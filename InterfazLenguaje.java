@@ -76,12 +76,19 @@ btnLimpiar.setFont(new Font("Arial", Font.BOLD, 14));
 
         panelBotones.add(btnAnalizar);
         panelBotones.add(btnEjecutar);
+        panelBotones.add(btnLimpiar);
         gbc.gridy = 3;
         gbc.weighty = 0.05;
         add(panelBotones, gbc);
 
         btnAnalizar.addActionListener(e -> generarTablaTokens());
         btnEjecutar.addActionListener(e -> ejecutarCodigoReal());
+        btnLimpiar.addActionListener(e -> {         
+    txtCodigo.setText("");
+    txtConsola.setText("");
+    modeloTabla.setRowCount(0);
+    memoria.clear();
+});
     }
 
     private void generarTablaTokens() {
