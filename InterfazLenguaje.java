@@ -36,7 +36,7 @@ public class InterfazLenguaje extends JFrame {
         add(new JScrollPane(txtCodigo), gbc);
 
         // 2. Tabla de Tokens
-        String[] columnas = { "Tipo de Token", "Lexema", "Descripción", "¿Es Reservada?" };
+        String[] columnas = { "Token", "Lexema", "Patrón", "¿Es Reservada?" };
         modeloTabla = new DefaultTableModel(columnas, 0);
         tablaTokens = new JTable(modeloTabla);
         gbc.gridy = 1;
@@ -78,7 +78,12 @@ public class InterfazLenguaje extends JFrame {
 
     private void generarTablaTokens() {
         modeloTabla.setRowCount(0);
-        String regex = "(alto|grande|venti)|([0-9]+\\.[0-9]+)|([0-9]+)|(\"[^\"]*\")|([=+\\-*/])|([a-zA-Z_][a-zA-Z0-9_]*)";
+        String regex = "(alto|grande|venti)" +
+                "|([0-9]{1,10}\\.[0-9]{1,10})" +
+                "|([0-9]{1,10})" +
+                "|(\"[^\"]*\")" +
+                "|([=+\\-*/;])" +
+                "|([a-zA-Z_][a-zA-Z0-9_]*)";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(txtCodigo.getText());
 
@@ -88,23 +93,23 @@ public class InterfazLenguaje extends JFrame {
 
             if (matcher.group(1) != null) {
                 tipo = "TIPO_DATO";
-                desc = "Palabra clave";
+                desc = "(alto|grande|venti)";
                 res = "Sí";
             } else if (matcher.group(2) != null) {
                 tipo = "LITERAL_GRANDE";
-                desc = "Decimal";
+                desc = "[0-9]{1,10}\\.[0-9]{1,10}";
             } else if (matcher.group(3) != null) {
                 tipo = "LITERAL_ALTO";
-                desc = "Entero";
+                desc = "[0-9]{1,10}";
             } else if (matcher.group(4) != null) {
                 tipo = "LITERAL_VENTI";
-                desc = "Texto";
+                desc = "\"[^\"]*\"";
             } else if (matcher.group(5) != null) {
                 tipo = "OPERADOR";
-                desc = "Operación";
+                desc = "[=+\\-*/;]";
             } else if (matcher.group(6) != null) {
                 tipo = "IDENTIFICADOR";
-                desc = "Variable";
+                desc = "[a-zA-Z_][a-zA-Z0-9_]*";
             }
 
             modeloTabla.addRow(new Object[] { tipo, lexema, desc, res });
@@ -118,7 +123,7 @@ public class InterfazLenguaje extends JFrame {
 
         for (int i = 0; i < lineas.length; i++) {
             String linea = lineas[i].trim();
-            if (linea.isEmpty() || linea.startsWith("//"))
+            if (linea.isEmpty() || linea.startsWith("//") || linea.startsWith("#"))
                 continue;
 
             try {
@@ -165,19 +170,45 @@ public class InterfazLenguaje extends JFrame {
         }
     }
 
-    private int evaluarInt(String exp) {
-        if (exp.contains("+"))
-            return getValInt(exp.split("\\+")[0]) + getValInt(exp.split("\\+")[1]);
-        if (exp.contains("-"))
-            return getValInt(exp.split("-")[0]) - getValInt(exp.split("-")[1]);
-        if (exp.contains("*"))
-            return getValInt(exp.split("\\*")[0]) * getValInt(exp.split("\\*")[1]);
-        if (exp.contains("/"))
-            return getValInt(exp.split("/")[0]) / getValInt(exp.split("/")[1]);
+    private int evaluarInt(String exp) throws LenguajeException {
+        if (exp.matches(".*[+\\-*/]\\s*$")) {
+            throw new LenguajeException("Error de sintaxis: falta un operando.");
+        }
+
+        if (exp.contains("+")) {
+            String[] p = exp.split("\\+");
+            if (p.length < 2)
+                throw new LenguajeException("Error de sintaxis: falta un operando.");
+            return getValInt(p[0]) + getValInt(p[1]);
+        }
+
+        if (exp.contains("-")) {
+            String[] p = exp.split("-");
+            if (p.length < 2)
+                throw new LenguajeException("Error de sintaxis: falta un operando.");
+            return getValInt(p[0]) - getValInt(p[1]);
+        }
+
+        if (exp.contains("*")) {
+            String[] p = exp.split("\\*");
+            if (p.length < 2)
+                throw new LenguajeException("Error de sintaxis: falta un operando.");
+            return getValInt(p[0]) * getValInt(p[1]);
+        }
+
+        if (exp.contains("/")) {
+            String[] p = exp.split("/");
+            if (p.length < 2)
+                throw new LenguajeException("Error de sintaxis: falta un operando.");
+            if (getValInt(p[1]) == 0)
+                throw new LenguajeException("Error: división por cero en ALTO.");
+            return getValInt(p[0]) / getValInt(p[1]);
+        }
+
         return getValInt(exp);
     }
 
-    private double evaluarDouble(String exp) {
+    private double evaluarDouble(String exp) throws LenguajeException  {
         if (exp.contains("+"))
             return getValDouble(exp.split("\\+")[0]) + getValDouble(exp.split("\\+")[1]);
         if (exp.contains("-"))
@@ -189,41 +220,53 @@ public class InterfazLenguaje extends JFrame {
         return getValDouble(exp);
     }
 
-    private String evaluarVenti(String exp) {
-        if (exp.contains("+")) {
+private String evaluarVenti(String exp) throws LenguajeException {
+            if (exp.contains("+")) {
             String[] p = exp.split("\\+");
             return getValVenti(p[0]) + getValVenti(p[1]);
         }
         return getValVenti(exp);
     }
 
-    private int getValInt(String s) {
+    private int getValInt(String s) throws LenguajeException {
         s = s.trim();
+
         if (!memoria.containsKey(s)) {
-            try {
-                return Integer.parseInt(s);
-            } catch (Exception e) {
-                throw new NullPointerException(s);
+            if (!s.matches("[0-9]{1,10}")) {
+                throw new LenguajeException("Error en ALTO: valor inválido o variable no definida: " + s);
             }
+            return Integer.parseInt(s);
         }
+
         return (int) memoria.get(s);
     }
 
-    private double getValDouble(String s) {
+    private double getValDouble(String s) throws LenguajeException {
         s = s.trim();
+
         if (!memoria.containsKey(s)) {
-            try {
-                return Double.parseDouble(s);
-            } catch (Exception e) {
-                throw new NullPointerException(s);
+            if (!s.matches("-?[0-9]{1,10}\\.[0-9]{1,10}")) {
+                throw new LenguajeException(
+                        "Error en GRANDE: formato inválido. Usa máximo 10 dígitos antes y después del punto.");
             }
+            return Double.parseDouble(s);
         }
+
         return (double) memoria.get(s);
     }
 
-    private String getValVenti(String s) {
-        s = s.trim().replace("\"", "");
-        return memoria.containsKey(s) ? (String) memoria.get(s) : s;
+    private String getValVenti(String s) throws LenguajeException {
+        s = s.trim();
+
+        if (memoria.containsKey(s)) {
+            return (String) memoria.get(s);
+        }
+
+        if (!s.matches("\"[^\"]*\"")) {
+            throw new LenguajeException("Error en VENTI: no debe haber caracteres después de las comillas.");
+        }
+
+        return s.substring(1, s.length() - 1);
     }
 
     public static void main(String[] args) {

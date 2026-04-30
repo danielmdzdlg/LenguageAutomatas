@@ -12,8 +12,8 @@ public class Alto {
     }
 
     private void validar(int v) throws LenguajeException {
-        if (String.valueOf(Math.abs(v)).length() > 10) {
-            throw new LenguajeException("Error en ALTO: El valor excede los 10 dígitos permitidos.");
+        if (!String.valueOf(Math.abs(v)).matches("[0-9]{1,10}")) {
+            throw new LenguajeException("Error en ALTO: un int solo puede tener máximo 10 dígitos.");
         }
     }
 
