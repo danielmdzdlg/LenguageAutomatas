@@ -74,8 +74,16 @@ public class InterfazLenguaje extends JFrame {
         btnEjecutar.setForeground(Color.BLACK); // Letras negras para máximo contraste
         btnEjecutar.setFont(new Font("Arial", Font.BOLD, 14));
 
+        JButton btnDiccionario = new JButton("Ver Diccionario");
+        btnDiccionario.setOpaque(true);
+        btnDiccionario.setBorderPainted(false);
+        btnDiccionario.setBackground(new Color(70, 130, 180)); // Azul
+        btnDiccionario.setForeground(Color.WHITE);
+        btnDiccionario.setFont(new Font("Arial", Font.BOLD, 14));
+
         panelBotones.add(btnAnalizar);
         panelBotones.add(btnEjecutar);
+        panelBotones.add(btnDiccionario);
         panelBotones.add(btnLimpiar);
         gbc.gridy = 3;
         gbc.weighty = 0.05;
@@ -83,6 +91,7 @@ public class InterfazLenguaje extends JFrame {
 
         btnAnalizar.addActionListener(e -> generarTablaTokens());
         btnEjecutar.addActionListener(e -> ejecutarCodigoReal());
+        btnDiccionario.addActionListener(e -> mostrarDiccionario());
         btnLimpiar.addActionListener(e -> {
             txtCodigo.setText("");
             txtConsola.setText("");
@@ -312,6 +321,47 @@ public class InterfazLenguaje extends JFrame {
             throw new LenguajeException("Error en GRANDE: número mal escrito, formato inválido.", "ERROR DE SINTAXIS");
         }
         return Double.parseDouble(s);
+    }
+
+    private void mostrarDiccionario() {
+        txtConsola.setText("--- Diccionario del Lenguaje VGV ---\n\n");
+        txtConsola.append(String.format("%-20s %-20s%n", "Lexema", "Tipo"));
+        txtConsola.append("----------------------------------------\n");
+
+        String regex = "(alto|grande|venti)" +
+                "|([0-9]{1,10}\\.[0-9]{1,10})" +
+                "|([0-9]{1,10})" +
+                "|(\"[^\"]*\")" +
+                "|([~+\\-*/;])" +
+                "|([a-zA-Z_][a-zA-Z0-9_]*)";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(txtCodigo.getText());
+
+        while (matcher.find()) {
+            String lexema = matcher.group();
+            String tipo = "";
+
+            if (matcher.group(1) != null) {
+                tipo = "palabra reservada";
+            } else if (matcher.group(2) != null) {
+                tipo = "constante grande";
+            } else if (matcher.group(3) != null) {
+                tipo = "constante alto";
+            } else if (matcher.group(4) != null) {
+                tipo = "constante venti";
+            } else if (matcher.group(5) != null) {
+                if (lexema.equals("~")) tipo = "operador asignación";
+                else if (lexema.equals(";")) tipo = "break";
+                else tipo = "operador aritmético";
+            } else if (matcher.group(6) != null) {
+                tipo = "identificador";
+            }
+
+            txtConsola.append(String.format("%-20s %-20s%n", lexema, tipo));
+        }
+
+        txtConsola.append("\n--- Fin del Diccionario ---");
     }
 
     public static void main(String[] args) {
