@@ -246,21 +246,19 @@ private String evaluarVenti(String exp) throws LenguajeException {
     }
 
     private long getValInt(String s) throws LenguajeException {
-
         s = s.trim();
-
         if (!memoria.containsKey(s)) {
-
-            if (!s.matches("[0-9]{1,10}")) {
-                throw new LenguajeException("Error en ALTO: valor inválido o variable no definida: " + s);
-
+            try {
+                return Long.parseLong(s);
+            } catch (NumberFormatException e) {
+                throw new LenguajeException("Error en ALTO: El valor excede los 10 dígitos permitidos.");
+            } catch (Exception e) {
+                throw new NullPointerException(s);
             }
-            return Long.parseLong(s);
         }
-
         return ((Number) memoria.get(s)).longValue();
-
     }
+
 
     private double getValDouble(String s) throws LenguajeException {
         s = s.trim();
