@@ -57,6 +57,14 @@ public class InterfazLenguaje extends JFrame {
         // 4. Panel de Botones
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnAnalizar = new JButton("Generar Tabla de Tokens");
+        
+        // --- BOTÓN LIMPIAR ---
+JButton btnLimpiar = new JButton("Limpiar Todo");
+btnLimpiar.setOpaque(true);
+btnLimpiar.setBorderPainted(false);
+btnLimpiar.setBackground(new Color(220, 53, 69)); // Rojo
+btnLimpiar.setForeground(Color.WHITE);
+btnLimpiar.setFont(new Font("Arial", Font.BOLD, 14));
 
         // --- BOTÓN EJECUTAR (FORZANDO COLOR) ---
         JButton btnEjecutar = new JButton("Ejecutar Código");
@@ -68,12 +76,19 @@ public class InterfazLenguaje extends JFrame {
 
         panelBotones.add(btnAnalizar);
         panelBotones.add(btnEjecutar);
+        panelBotones.add(btnLimpiar);
         gbc.gridy = 3;
         gbc.weighty = 0.05;
         add(panelBotones, gbc);
 
         btnAnalizar.addActionListener(e -> generarTablaTokens());
         btnEjecutar.addActionListener(e -> ejecutarCodigoReal());
+        btnLimpiar.addActionListener(e -> {         
+    txtCodigo.setText("");
+    txtConsola.setText("");
+    modeloTabla.setRowCount(0);
+    memoria.clear();
+});
     }
 
     private void generarTablaTokens() {

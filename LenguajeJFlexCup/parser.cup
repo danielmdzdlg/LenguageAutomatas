@@ -1,0 +1,30 @@
+import java_cup.runtime.*;
+
+parser code {:
+public static void main(String[] args) throws Exception {
+parser p = new parser(new Lexer(System.in));
+p.parse();
+}
+:};
+
+terminal ALTO, GRANDE;
+terminal String ID, ENTERO, DECIMAL;
+terminal MAS, MENOS, POR, DIV, IGUAL;
+
+non terminal inicio, sentencia, expresion;
+
+precedence left MAS, MENOS;
+precedence left POR, DIV;
+
+inicio ::= sentencia;
+
+sentencia ::= ALTO ID IGUAL expresion
+| GRANDE ID IGUAL expresion;
+
+expresion ::= expresion MAS expresion
+| expresion MENOS expresion
+| expresion POR expresion
+| expresion DIV expresion
+| ENTERO
+| DECIMAL
+| ID;
