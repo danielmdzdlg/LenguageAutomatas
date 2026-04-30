@@ -97,7 +97,7 @@ public class InterfazLenguaje extends JFrame {
                 "|([0-9]{1,10}\\.[0-9]{1,10})" +
                 "|([0-9]{1,10})" +
                 "|(\"[^\"]*\")" +
-                "|([=+\\-*/;])" +
+                "|([~+\\-*/;])" +
                 "|([a-zA-Z_][a-zA-Z0-9_]*)";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(txtCodigo.getText());
@@ -121,7 +121,7 @@ public class InterfazLenguaje extends JFrame {
                 desc = "\"[^\"]*\"";
             } else if (matcher.group(5) != null) {
                 tipo = "OPERADOR";
-                desc = "[=+\\-*/;]";
+                desc = "[~+\\-*/;]";
             } else if (matcher.group(6) != null) {
                 tipo = "IDENTIFICADOR";
                 desc = "[a-zA-Z_][a-zA-Z0-9_]*";
@@ -138,7 +138,7 @@ public class InterfazLenguaje extends JFrame {
 
         for (int i = 0; i < lineas.length; i++) {
             String linea = lineas[i].trim();
-            if (linea.isEmpty() || linea.startsWith("//") || linea.startsWith("#"))
+            if (linea.isEmpty() || linea.startsWith("#"))
                 continue;
 
             try {
@@ -158,9 +158,9 @@ public class InterfazLenguaje extends JFrame {
     }
 
     private void procesarLinea(String linea) throws LenguajeException {
-        if (!linea.contains("="))
-            throw new LenguajeException("Error: declaración incompleta, falta '=' y valor.", "ERROR DE SINTAXIS");
-        String[] partes = linea.split("=");
+        if (!linea.contains("~"))
+            throw new LenguajeException("Error: declaración incompleta, falta '~' y valor.", "ERROR DE SINTAXIS");
+        String[] partes = linea.split("~");
         String[] decl = partes[0].trim().split("\\s+");
         String tipo = decl[0];
         if (decl.length < 2) {
@@ -176,19 +176,19 @@ public class InterfazLenguaje extends JFrame {
             long res = evaluarInt(exp);
             Alto a = new Alto(res);
             memoria.put(nombre, res);
-            txtConsola.append("[ALTO] " + nombre + " = " + a + "\n");
+            txtConsola.append("[ALTO] " + nombre + " ~ " + a + "\n");
         } else if (tipo.equals("grande")) {
             double res = evaluarGrande(exp);
             Grande g = new Grande(res);
             memoria.put(nombre, g.getValor());
-            txtConsola.append("[GRANDE] " + nombre + " = " + g + "\n");
+            txtConsola.append("[GRANDE] " + nombre + " ~ " + g + "\n");
         } else if (tipo.equals("venti")) {
             if (!exp.contains("+") && !exp.startsWith("\"") || !exp.contains("+") && !exp.endsWith("\"")) {
                 throw new LenguajeException("Error en VENTI: el texto debe estar entre comillas.", "ERROR DE SINTAXIS");
             }
             String res = evaluarVenti(exp);
             memoria.put(nombre, res);
-            txtConsola.append("[VENTI] " + nombre + " = \"" + res + "\"\n");
+            txtConsola.append("[VENTI] " + nombre + " ~ \"" + res + "\"\n");
         } else {
             throw new LenguajeException("Error: tipo de dato '" + tipo + "' no reconocido.", "ERROR DE TIPO");
         }
