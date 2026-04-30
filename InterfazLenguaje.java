@@ -57,7 +57,7 @@ public class InterfazLenguaje extends JFrame {
         // 4. Panel de Botones
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnAnalizar = new JButton("Generar Tabla de Tokens");
-        
+
         // --- BOTÓN LIMPIAR ---
         JButton btnLimpiar = new JButton("Limpiar Todo");
         btnLimpiar.setOpaque(true);
@@ -83,12 +83,12 @@ public class InterfazLenguaje extends JFrame {
 
         btnAnalizar.addActionListener(e -> generarTablaTokens());
         btnEjecutar.addActionListener(e -> ejecutarCodigoReal());
-        btnLimpiar.addActionListener(e -> {         
-        txtCodigo.setText("");
-        txtConsola.setText("");
-        modeloTabla.setRowCount(0);
-        memoria.clear();
-});
+        btnLimpiar.addActionListener(e -> {
+            txtCodigo.setText("");
+            txtConsola.setText("");
+            modeloTabla.setRowCount(0);
+            memoria.clear();
+        });
     }
 
     private void generarTablaTokens() {
@@ -158,6 +158,13 @@ public class InterfazLenguaje extends JFrame {
     }
 
     private void procesarLinea(String linea) throws LenguajeException {
+        // Validar que termine en ;
+        if (!linea.endsWith(";")) {
+            throw new LenguajeException(
+                    "Error de sintaxis: falta ';' al final de la instrucción.",
+                    "ERROR DE SINTAXIS");
+        }
+        linea = linea.substring(0, linea.length() - 1).trim();
         if (!linea.contains("~"))
             throw new LenguajeException("Error: declaración incompleta, falta '~' y valor.", "ERROR DE SINTAXIS");
         String[] partes = linea.split("~");
@@ -169,7 +176,8 @@ public class InterfazLenguaje extends JFrame {
         String nombre = decl[1];
         String exp = partes.length > 1 ? partes[1].trim() : "";
         if (exp.isEmpty()) {
-            throw new LenguajeException("Error: la variable '" + nombre + "' no tiene valor asignado.", "ERROR DE SINTAXIS");
+            throw new LenguajeException("Error: la variable '" + nombre + "' no tiene valor asignado.",
+                    "ERROR DE SINTAXIS");
         }
 
         if (tipo.equals("alto")) {
@@ -193,7 +201,6 @@ public class InterfazLenguaje extends JFrame {
             throw new LenguajeException("Error: tipo de dato '" + tipo + "' no reconocido.", "ERROR DE TIPO");
         }
     }
-
 
     private long evaluarInt(String exp) throws LenguajeException {
         if (exp.matches(".*[+\\-*/]\\s*$")) {
@@ -230,13 +237,11 @@ public class InterfazLenguaje extends JFrame {
             return getValInt(p[0]) / getValInt(p[1]);
         }
 
-
         return getValInt(exp);
-}
+    }
 
-
-private String evaluarVenti(String exp) throws LenguajeException {
-            if (exp.contains("+")) {
+    private String evaluarVenti(String exp) throws LenguajeException {
+        if (exp.contains("+")) {
             String[] p = exp.split("\\+");
             return getValVenti(p[0]) + getValVenti(p[1]);
         }
@@ -252,7 +257,8 @@ private String evaluarVenti(String exp) throws LenguajeException {
             try {
                 return Long.parseLong(s);
             } catch (NumberFormatException e) {
-                throw new LenguajeException("Error en ALTO: El valor excede los 10 dígitos permitidos.", "ERROR DE LÍMITES");
+                throw new LenguajeException("Error en ALTO: El valor excede los 10 dígitos permitidos.",
+                        "ERROR DE LÍMITES");
             }
         }
         return ((Number) memoria.get(s)).longValue();
@@ -279,9 +285,6 @@ private String evaluarVenti(String exp) throws LenguajeException {
         }
         return getValGrande(exp);
     }
-
-
-   
 
     private String getValVenti(String s) throws LenguajeException {
         s = s.trim();
