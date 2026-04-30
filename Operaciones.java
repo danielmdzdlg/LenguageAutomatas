@@ -16,7 +16,7 @@ public class Operaciones {
 
     public Alto dividir(Alto a, Alto b) throws LenguajeException {
         if (b.getValor() == 0)
-            throw new LenguajeException("Error: División por cero en ALTO.");
+            throw new LenguajeException("Error en ALTO: división entre cero no permitida.", "ERROR SEMÁNTICO");
         return new Alto(a.getValor() / b.getValor());
     }
 
@@ -35,7 +35,7 @@ public class Operaciones {
 
     public Grande dividir(Grande a, Grande b) throws LenguajeException {
         if (b.getValor() == 0)
-            throw new LenguajeException("Error: División por cero en GRANDE.");
+            throw new LenguajeException("Error en Grande: división entre cero no permitida.", "ERROR SEMÁNTICO");
         return new Grande(a.getValor() / b.getValor());
     }
 

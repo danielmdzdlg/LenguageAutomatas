@@ -17,8 +17,7 @@ public class Grande {
     private void validar(String texto) throws LenguajeException {
         if (texto.startsWith("-")) texto = texto.substring(1);
         if (!texto.matches("[0-9]{1,10}\\.[0-9]{1,10}")) {
-            throw new LenguajeException(
-                "Error en GRANDE: debe tener máximo 10 dígitos a la izquierda y máximo 10 a la derecha del punto.");
+            throw new LenguajeException("Error en GRANDE: número mal escrito, formato inválido.", "ERROR DE SINTAXIS");
         }
     }
 

@@ -144,7 +144,7 @@ public class InterfazLenguaje extends JFrame {
             try {
                 procesarLinea(linea);
             } catch (LenguajeException ex) {
-                txtConsola.append("[ERROR DE LÍMITES - LÍNEA " + (i + 1) + "] " + ex.getMessage() + "\n");
+                txtConsola.append("[" + ex.getTipo() + " - LÍNEA " + (i + 1) + "] " + ex.getMessage() + "\n");
             } catch (NullPointerException ex) {
                 txtConsola.append(
                         "[ERROR SEMÁNTICO - LÍNEA " + (i + 1) + "] Variable '" + ex.getMessage() + "' no definida.\n");
@@ -159,12 +159,18 @@ public class InterfazLenguaje extends JFrame {
 
     private void procesarLinea(String linea) throws LenguajeException {
         if (!linea.contains("="))
-            throw new RuntimeException();
+            throw new LenguajeException("Error: declaración incompleta, falta '=' y valor.", "ERROR DE SINTAXIS");
         String[] partes = linea.split("=");
         String[] decl = partes[0].trim().split("\\s+");
-        String exp = partes[1].trim();
         String tipo = decl[0];
-        String nombre = (decl.length > 1) ? decl[1] : decl[0];
+        if (decl.length < 2) {
+            throw new LenguajeException("Error: falta el nombre de la variable.", "ERROR DE SINTAXIS");
+        }
+        String nombre = decl[1];
+        String exp = partes.length > 1 ? partes[1].trim() : "";
+        if (exp.isEmpty()) {
+            throw new LenguajeException("Error: la variable '" + nombre + "' no tiene valor asignado.", "ERROR DE SINTAXIS");
+        }
 
         if (tipo.equals("alto")) {
             long res = evaluarInt(exp);
@@ -172,52 +178,55 @@ public class InterfazLenguaje extends JFrame {
             memoria.put(nombre, res);
             txtConsola.append("[ALTO] " + nombre + " = " + a + "\n");
         } else if (tipo.equals("grande")) {
-            double res = evaluarDouble(exp);
+            double res = evaluarGrande(exp);
             Grande g = new Grande(res);
             memoria.put(nombre, g.getValor());
             txtConsola.append("[GRANDE] " + nombre + " = " + g + "\n");
         } else if (tipo.equals("venti")) {
+            if (!exp.contains("+") && !exp.startsWith("\"") || !exp.contains("+") && !exp.endsWith("\"")) {
+                throw new LenguajeException("Error en VENTI: el texto debe estar entre comillas.", "ERROR DE SINTAXIS");
+            }
             String res = evaluarVenti(exp);
             memoria.put(nombre, res);
             txtConsola.append("[VENTI] " + nombre + " = \"" + res + "\"\n");
         } else {
-            throw new RuntimeException(); // Error de tipo desconocido
+            throw new LenguajeException("Error: tipo de dato '" + tipo + "' no reconocido.", "ERROR DE TIPO");
         }
     }
 
 
     private long evaluarInt(String exp) throws LenguajeException {
         if (exp.matches(".*[+\\-*/]\\s*$")) {
-            throw new LenguajeException("Error de sintaxis: falta un operando.");
+            throw new LenguajeException("Error de sintaxis: falta un operando.", "ERROR DE SINTAXIS");
         }
 
         if (exp.contains("+")) {
             String[] p = exp.split("\\+");
             if (p.length < 2)
-                throw new LenguajeException("Error de sintaxis: falta un operando.");
+                throw new LenguajeException("Error de sintaxis: falta un operando.", "ERROR DE SINTAXIS");
             return getValInt(p[0]) + getValInt(p[1]);
         }
 
         if (exp.contains("-")) {
             String[] p = exp.split("-");
             if (p.length < 2)
-                throw new LenguajeException("Error de sintaxis: falta un operando.");
+                throw new LenguajeException("Error de sintaxis: falta un operando.", "ERROR DE SINTAXIS");
             return getValInt(p[0]) - getValInt(p[1]);
         }
 
         if (exp.contains("*")) {
             String[] p = exp.split("\\*");
             if (p.length < 2)
-                throw new LenguajeException("Error de sintaxis: falta un operando.");
+                throw new LenguajeException("Error de sintaxis: falta un operando.", "ERROR DE SINTAXIS");
             return getValInt(p[0]) * getValInt(p[1]);
         }
 
         if (exp.contains("/")) {
             String[] p = exp.split("/");
             if (p.length < 2)
-                throw new LenguajeException("Error de sintaxis: falta un operando.");
+                throw new LenguajeException("Error de sintaxis: falta un operando.", "ERROR DE SINTAXIS");
             if (getValInt(p[1]) == 0)
-                throw new LenguajeException("Error: división por cero en ALTO.");
+                throw new LenguajeException("Error en ALTO: división entre cero no permitida.", "ERROR SEMÁNTICO");
             return getValInt(p[0]) / getValInt(p[1]);
         }
 
@@ -225,17 +234,6 @@ public class InterfazLenguaje extends JFrame {
         return getValInt(exp);
 }
 
-    private double evaluarDouble(String exp) throws LenguajeException  {
-        if (exp.contains("+"))
-            return getValDouble(exp.split("\\+")[0]) + getValDouble(exp.split("\\+")[1]);
-        if (exp.contains("-"))
-            return getValDouble(exp.split("-")[0]) - getValDouble(exp.split("-")[1]);
-        if (exp.contains("*"))
-            return getValDouble(exp.split("\\*")[0]) * getValDouble(exp.split("\\*")[1]);
-        if (exp.contains("/"))
-            return getValDouble(exp.split("/")[0]) / getValDouble(exp.split("/")[1]);
-        return getValDouble(exp);
-    }
 
 private String evaluarVenti(String exp) throws LenguajeException {
             if (exp.contains("+")) {
@@ -248,44 +246,69 @@ private String evaluarVenti(String exp) throws LenguajeException {
     private long getValInt(String s) throws LenguajeException {
         s = s.trim();
         if (!memoria.containsKey(s)) {
+            if (!s.matches("-?[0-9]+")) {
+                throw new LenguajeException("Error en ALTO: '" + s + "' no es un número válido.", "ERROR SEMÁNTICO");
+            }
             try {
                 return Long.parseLong(s);
             } catch (NumberFormatException e) {
-                throw new LenguajeException("Error en ALTO: El valor excede los 10 dígitos permitidos.");
-            } catch (Exception e) {
-                throw new NullPointerException(s);
+                throw new LenguajeException("Error en ALTO: El valor excede los 10 dígitos permitidos.", "ERROR DE LÍMITES");
             }
         }
         return ((Number) memoria.get(s)).longValue();
     }
 
-
-    private double getValDouble(String s) throws LenguajeException {
-        s = s.trim();
-
-        if (!memoria.containsKey(s)) {
-            if (!s.matches("-?[0-9]{1,10}\\.[0-9]{1,10}")) {
-                throw new LenguajeException(
-                        "Error en GRANDE: formato inválido. Usa máximo 10 dígitos antes y después del punto.");
-            }
-            return Double.parseDouble(s);
+    private double evaluarGrande(String exp) throws LenguajeException {
+        if (exp.contains("+")) {
+            String[] p = exp.split("\\+");
+            return getValGrande(p[0]) + getValGrande(p[1]);
         }
-
-        return (double) memoria.get(s);
+        if (exp.contains("-")) {
+            String[] p = exp.split("-");
+            return getValGrande(p[0]) - getValGrande(p[1]);
+        }
+        if (exp.contains("*")) {
+            String[] p = exp.split("\\*");
+            return getValGrande(p[0]) * getValGrande(p[1]);
+        }
+        if (exp.contains("/")) {
+            String[] p = exp.split("/");
+            if (getValGrande(p[1]) == 0)
+                throw new LenguajeException("Error en GRANDE: división por cero no permitida.", "ERROR SEMÁNTICO");
+            return getValGrande(p[0]) / getValGrande(p[1]);
+        }
+        return getValGrande(exp);
     }
+
+
+   
 
     private String getValVenti(String s) throws LenguajeException {
         s = s.trim();
-
         if (memoria.containsKey(s)) {
             return (String) memoria.get(s);
         }
-
-        if (!s.matches("\"[^\"]*\"")) {
-            throw new LenguajeException("Error en VENTI: no debe haber caracteres después de las comillas.");
+        if (s.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
+            throw new LenguajeException("Error en VENTI: variable '" + s + "' no definida.", "ERROR SEMÁNTICO");
         }
-
+        if (!s.matches("\"[^\"]*\"")) {
+            throw new LenguajeException("Error en VENTI: el texto debe estar entre comillas.", "ERROR DE SINTAXIS");
+        }
         return s.substring(1, s.length() - 1);
+    }
+
+    private double getValGrande(String s) throws LenguajeException {
+        s = s.trim();
+        if (memoria.containsKey(s)) {
+            return ((Number) memoria.get(s)).doubleValue();
+        }
+        if (!s.matches("-?[0-9]{1,10}\\.[0-9]{1,10}")) {
+            if (s.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
+                throw new LenguajeException("Error en GRANDE: variable '" + s + "' no definida.", "ERROR SEMÁNTICO");
+            }
+            throw new LenguajeException("Error en GRANDE: número mal escrito, formato inválido.", "ERROR DE SINTAXIS");
+        }
+        return Double.parseDouble(s);
     }
 
     public static void main(String[] args) {

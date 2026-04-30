@@ -9,7 +9,7 @@ public class Alto {
 
     public Alto(long valor) throws LenguajeException {
         if (String.valueOf(Math.abs(valor)).length() > 10) {
-            throw new LenguajeException("Error en ALTO: El valor excede los 10 dígitos permitidos.");
+            throw new LenguajeException("Error en ALTO: El valor excede los 10 dígitos permitidos.", "ERROR DE LÍMITES");
         }
         this.valor = valor;
     }
@@ -20,7 +20,7 @@ public class Alto {
 
     private void validar(long v) throws LenguajeException {
         if (!String.valueOf(Math.abs(v)).matches("[0-9]{1,10}")) {
-            throw new LenguajeException("Error en ALTO: un int solo puede tener máximo 10 dígitos.");
+            throw new LenguajeException("Error en ALTO: un int solo puede tener máximo 10 dígitos", "ERROR DE LÍMITES");
 
         }
     }
