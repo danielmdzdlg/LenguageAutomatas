@@ -59,12 +59,12 @@ public class InterfazLenguaje extends JFrame {
         JButton btnAnalizar = new JButton("Generar Tabla de Tokens");
         
         // --- BOTÓN LIMPIAR ---
-JButton btnLimpiar = new JButton("Limpiar Todo");
-btnLimpiar.setOpaque(true);
-btnLimpiar.setBorderPainted(false);
-btnLimpiar.setBackground(new Color(220, 53, 69)); // Rojo
-btnLimpiar.setForeground(Color.WHITE);
-btnLimpiar.setFont(new Font("Arial", Font.BOLD, 14));
+        JButton btnLimpiar = new JButton("Limpiar Todo");
+        btnLimpiar.setOpaque(true);
+        btnLimpiar.setBorderPainted(false);
+        btnLimpiar.setBackground(new Color(220, 53, 69)); // Rojo
+        btnLimpiar.setForeground(Color.WHITE);
+        btnLimpiar.setFont(new Font("Arial", Font.BOLD, 14));
 
         // --- BOTÓN EJECUTAR (FORZANDO COLOR) ---
         JButton btnEjecutar = new JButton("Ejecutar Código");
@@ -84,10 +84,10 @@ btnLimpiar.setFont(new Font("Arial", Font.BOLD, 14));
         btnAnalizar.addActionListener(e -> generarTablaTokens());
         btnEjecutar.addActionListener(e -> ejecutarCodigoReal());
         btnLimpiar.addActionListener(e -> {         
-    txtCodigo.setText("");
-    txtConsola.setText("");
-    modeloTabla.setRowCount(0);
-    memoria.clear();
+        txtCodigo.setText("");
+        txtConsola.setText("");
+        modeloTabla.setRowCount(0);
+        memoria.clear();
 });
     }
 
@@ -167,9 +167,9 @@ btnLimpiar.setFont(new Font("Arial", Font.BOLD, 14));
         String nombre = (decl.length > 1) ? decl[1] : decl[0];
 
         if (tipo.equals("alto")) {
-            int res = evaluarInt(exp);
+            long res = evaluarInt(exp);
             Alto a = new Alto(res);
-            memoria.put(nombre, a.getValor());
+            memoria.put(nombre, res);
             txtConsola.append("[ALTO] " + nombre + " = " + a + "\n");
         } else if (tipo.equals("grande")) {
             double res = evaluarDouble(exp);
@@ -185,7 +185,8 @@ btnLimpiar.setFont(new Font("Arial", Font.BOLD, 14));
         }
     }
 
-    private int evaluarInt(String exp) throws LenguajeException {
+
+    private long evaluarInt(String exp) throws LenguajeException {
         if (exp.matches(".*[+\\-*/]\\s*$")) {
             throw new LenguajeException("Error de sintaxis: falta un operando.");
         }
@@ -220,8 +221,9 @@ btnLimpiar.setFont(new Font("Arial", Font.BOLD, 14));
             return getValInt(p[0]) / getValInt(p[1]);
         }
 
+
         return getValInt(exp);
-    }
+}
 
     private double evaluarDouble(String exp) throws LenguajeException  {
         if (exp.contains("+"))
@@ -243,17 +245,21 @@ private String evaluarVenti(String exp) throws LenguajeException {
         return getValVenti(exp);
     }
 
-    private int getValInt(String s) throws LenguajeException {
+    private long getValInt(String s) throws LenguajeException {
+
         s = s.trim();
 
         if (!memoria.containsKey(s)) {
+
             if (!s.matches("[0-9]{1,10}")) {
                 throw new LenguajeException("Error en ALTO: valor inválido o variable no definida: " + s);
+
             }
-            return Integer.parseInt(s);
+            return Long.parseLong(s);
         }
 
-        return (int) memoria.get(s);
+        return ((Number) memoria.get(s)).longValue();
+
     }
 
     private double getValDouble(String s) throws LenguajeException {
