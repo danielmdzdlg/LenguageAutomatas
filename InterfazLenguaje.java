@@ -20,7 +20,6 @@ public class InterfazLenguaje extends JFrame {
     private DefaultTableModel modeloTabla;
     private Map<String, Object> memoria = new HashMap<>();
 
-    // ── Paleta Dracula ──────────────────────────────────────────────────────────
     private final Color BG_MAIN    = new Color(40,  42,  54);
     private final Color BG_PANEL   = new Color(68,  71,  90);
     private final Color FG_TEXT    = new Color(248, 248, 242);
@@ -32,13 +31,12 @@ public class InterfazLenguaje extends JFrame {
     private final Color BTN_BLUE   = new Color(98,  114, 164);
     private final Color BTN_TEAL   = new Color(62,  166, 147);
 
-    // ── Colores Syntax Highlighting ─────────────────────────────────────────────
     private final Color SYN_STRING  = new Color(241, 250, 140);
     private final Color SYN_NUMBER  = new Color(189, 147, 249);
     private final Color SYN_COMMENT = new Color(98,  114, 164);
 
     public InterfazLenguaje() {
-        setTitle("Intérprete VGV - Daniel Mendoza (ITO)");
+        setTitle("Intérprete VGV");
         setSize(1050, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -54,7 +52,6 @@ public class InterfazLenguaje extends JFrame {
         Font fuenteCodigo  = new Font("Consolas",  Font.PLAIN, 16);
         Font fuenteTitulos = new Font("Segoe UI",  Font.BOLD,  14);
 
-        // ── 1. Editor de Código ──────────────────────────────────────────────────
         txtCodigo = new JTextPane();
         txtCodigo.setFont(fuenteCodigo);
         txtCodigo.setBackground(BG_PANEL);
@@ -71,7 +68,6 @@ public class InterfazLenguaje extends JFrame {
         gbc.weighty = 0.42;
         add(createModernScrollPane(noWrapPanel, "Editor de Código", ACCENT_CYAN, fuenteTitulos), gbc);
 
-        // ── 2. Tabla de Tokens (reducida) ────────────────────────────────────────
         String[] columnas = { "Token", "Lexema", "Patrón", "¿Es Reservada?" };
         modeloTabla = new DefaultTableModel(columnas, 0);
         tablaTokens = new JTable(modeloTabla);
@@ -93,7 +89,6 @@ public class InterfazLenguaje extends JFrame {
         gbc.weighty = 0.20;   // ← tabla más compacta
         add(createModernScrollPane(tablaTokens, "Tabla de Tokens", ACCENT_PINK, fuenteTitulos), gbc);
 
-        // ── 3. Consola de Salida ─────────────────────────────────────────────────
         txtConsola = new JTextPane();
         txtConsola.setEditable(false);
         txtConsola.setBackground(new Color(30, 31, 40));
@@ -103,7 +98,6 @@ public class InterfazLenguaje extends JFrame {
         gbc.weighty = 0.28;
         add(createModernScrollPane(txtConsola, "Consola de Ejecución", ACCENT_GREEN, fuenteTitulos), gbc);
 
-        // ── 4. Panel de Botones ──────────────────────────────────────────────────
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         panelBotones.setBackground(BG_MAIN);
 
@@ -121,7 +115,6 @@ public class InterfazLenguaje extends JFrame {
         gbc.weighty = 0.05;
         add(panelBotones, gbc);
 
-        // ── Listeners ────────────────────────────────────────────────────────────
         btnAnalizar.addActionListener(e -> generarTablaTokens());
         btnEjecutar.addActionListener(e -> ejecutarCodigoReal());
         btnDiccionario.addActionListener(e -> mostrarDiccionario());
@@ -132,10 +125,6 @@ public class InterfazLenguaje extends JFrame {
             memoria.clear();
         });
     }
-
-    // ════════════════════════════════════════════════════════════════════════════
-    //  ESTILOS Y SYNTAX HIGHLIGHTING
-    // ════════════════════════════════════════════════════════════════════════════
 
     private void configurarEstilosCodigo() {
         Style def      = txtCodigo.addStyle("Default",  null);
@@ -192,10 +181,6 @@ public class InterfazLenguaje extends JFrame {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════════
-    //  HELPERS DE UI
-    // ════════════════════════════════════════════════════════════════════════════
-
     private JScrollPane createModernScrollPane(Component comp, String title, Color titleColor, Font font) {
         JScrollPane scroll = new JScrollPane(comp);
         scroll.getViewport().setBackground(BG_PANEL);
@@ -239,10 +224,6 @@ public class InterfazLenguaje extends JFrame {
         catch (BadLocationException e) { return ""; }
     }
 
-    // ════════════════════════════════════════════════════════════════════════════
-    //  LÓGICA ORIGINAL (CÓDIGO 1) — sin cambios semánticos
-    // ════════════════════════════════════════════════════════════════════════════
-
     private void generarTablaTokens() {
         modeloTabla.setRowCount(0);
 
@@ -277,7 +258,7 @@ public class InterfazLenguaje extends JFrame {
             else if (matcher.group(2) != null) { tipo = "LITERAL_GRANDE";     desc = RX_GRANDE; }
             else if (matcher.group(3) != null) { tipo = "LITERAL_ALTO";       desc = RX_ALTO; }
             else if (matcher.group(4) != null) { tipo = "LITERAL_VENTI";      desc = RX_VENTI; }
-            else if (matcher.group(5) != null) { tipo = "OPERADOR";           desc = RX_OPERADOR; res = lexema.equals(";") ? "No" : "Sí"; }
+            else if (matcher.group(5) != null) { tipo = "OPERADOR";           desc = RX_OPERADOR; res = "Sí"; }
             else if (matcher.group(6) != null) { tipo = "IDENTIFICADOR";      desc = RX_IDENT; }
 
             modeloTabla.addRow(new Object[]{ tipo, lexema, desc, res });
@@ -309,13 +290,11 @@ public class InterfazLenguaje extends JFrame {
     }
 
     private void procesarLinea(String linea) throws LenguajeException {
-        // ── Validar punto y coma final ───────────────────────────────────────────
         if (!linea.endsWith(";"))
             throw new LenguajeException("Error de sintaxis: falta ';' al final de la instrucción.", "ERROR DE SINTAXIS");
 
         linea = linea.substring(0, linea.length() - 1).trim();
 
-        // ── Validar operador de asignación ───────────────────────────────────────
         if (!linea.contains("~"))
             throw new LenguajeException("Error de Sintaxis: falta el operador de asignación '~'.", "ERROR DE SINTAXIS");
 
@@ -331,57 +310,47 @@ public class InterfazLenguaje extends JFrame {
         String nombre = "";
 
         if (tokensIzq.length == 2) {
-            // ── Declaración: tipo nombre ~ valor ─────────────────────────────────
             tipo   = tokensIzq[0];
             nombre = tokensIzq[1];
 
-            // (Ex. 4) Lado izquierdo debe ser identificador válido
             if (!nombre.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
                 throw new LenguajeException(
                         "Error de Sintaxis: '" + nombre + "' no es un nombre de variable válido.",
                         "ERROR DE SINTAXIS");
 
-            // (Ex. 1) Nombre no puede ser palabra reservada
             if (nombre.equals("alto") || nombre.equals("grande") || nombre.equals("venti"))
                 throw new LenguajeException(
                         "Error Semántico: no puedes usar la palabra reservada '" + nombre + "' como nombre de variable.",
                         "ERROR SEMÁNTICO");
 
-            // (Ex. 2) No re-declarar
             if (memoria.containsKey(nombre))
                 throw new LenguajeException(
                         "Error Semántico: la variable '" + nombre + "' ya fue declarada previamente.",
                         "ERROR SEMÁNTICO");
 
-            // Tipo válido
             if (!tipo.equals("alto") && !tipo.equals("grande") && !tipo.equals("venti"))
                 throw new LenguajeException(
                         "Error de Tipo: tipo de dato '" + tipo + "' no reconocido. Usa 'alto', 'grande' o 'venti'.",
                         "ERROR DE TIPO");
 
         } else if (tokensIzq.length == 1) {
-            // ── Reasignación: nombre ~ valor ─────────────────────────────────────
             nombre = tokensIzq[0];
 
-            // (Ex. 4) Lado izquierdo debe ser identificador válido
             if (!nombre.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
                 throw new LenguajeException(
                         "Error de Sintaxis: la parte izquierda '" + nombre + "' no es un identificador válido.",
                         "ERROR DE SINTAXIS");
 
-            // (Ex. 1) Nombre no puede ser palabra reservada
             if (nombre.equals("alto") || nombre.equals("grande") || nombre.equals("venti"))
                 throw new LenguajeException(
                         "Error Semántico: no puedes usar la palabra reservada '" + nombre + "' como variable.",
                         "ERROR SEMÁNTICO");
 
-            // (Ex. 3) Uso antes de declaración
             if (!memoria.containsKey(nombre))
                 throw new LenguajeException(
                         "Error Semántico: la variable '" + nombre + "' no ha sido declarada antes de usarse.",
                         "ERROR SEMÁNTICO");
 
-            // Inferir tipo desde la memoria
             Object val = memoria.get(nombre);
             if      (val instanceof Long)   tipo = "alto";
             else if (val instanceof Double) tipo = "grande";
@@ -393,7 +362,6 @@ public class InterfazLenguaje extends JFrame {
                     "ERROR DE SINTAXIS");
         }
 
-        // ── Ejecutar según tipo ───────────────────────────────────────────────────
         switch (tipo) {
             case "alto": {
                 long res = evaluarInt(exp);
@@ -443,10 +411,8 @@ public class InterfazLenguaje extends JFrame {
 
     private double evaluarGrande(String exp) throws LenguajeException {
         exp = exp.trim();
-        // (Ex. 5) Operadores al final sin operando
         if (exp.matches(".*[+\\-*/]\\s*$"))
             throw new LenguajeException("Error de Sintaxis: falta un operando al final de la expresión.", "ERROR DE SINTAXIS");
-        // (Ex. 5) Operadores consecutivos/repetidos
         if (exp.matches(".*[+\\-*/]{2,}.*"))
             throw new LenguajeException(
                     "Error de Sintaxis: operadores consecutivos en la expresión '" + exp + "'.",
@@ -466,7 +432,6 @@ public class InterfazLenguaje extends JFrame {
 
     private String evaluarVenti(String exp) throws LenguajeException {
         exp = exp.trim();
-        // (Ex. 6) Operaciones prohibidas en cadenas
         if (exp.matches(".*[\\-*/].*"))
             throw new LenguajeException(
                     "Error de Tipo: solo puedes usar '+' para concatenar 'venti'. Restar, multiplicar o dividir textos no está permitido.",
@@ -482,17 +447,14 @@ public class InterfazLenguaje extends JFrame {
         s = s.trim();
         if (memoria.containsKey(s)) {
             Object val = memoria.get(s);
-            // (Ex. 7) Conflicto de tipos
             if (!(val instanceof Long) && !(val instanceof Integer))
                 throw new LenguajeException(
                         "Conflicto de Tipos: la variable '" + s + "' no contiene un número 'alto' (entero).",
                         "ERROR DE TIPO");
             return ((Number) val).longValue();
         }
-        // Variable no definida
         if (s.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
             throw new LenguajeException("Error de Referencia: la variable '" + s + "' no ha sido definida.", "ERROR SEMÁNTICO");
-        // (Ex. 8) Decimal en alto
         if (s.contains("."))
             throw new LenguajeException(
                     "Error de Tipo: un valor 'alto' no puede tener decimales (" + s + "). Usa 'grande'.",
@@ -510,7 +472,6 @@ public class InterfazLenguaje extends JFrame {
 
     private double getValGrande(String s) throws LenguajeException {
         s = s.trim();
-        // (Ex. 7) Conflicto de tipos
         if (memoria.containsKey(s)) {
             Object val = memoria.get(s);
             if (val instanceof Double)  return (double) val;
@@ -519,15 +480,12 @@ public class InterfazLenguaje extends JFrame {
                     "Conflicto de Tipos: la variable '" + s + "' no es numérica.",
                     "ERROR DE TIPO");
         }
-        // Variable no definida
         if (s.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
             throw new LenguajeException("Error de Referencia: la variable '" + s + "' no ha sido definida.", "ERROR SEMÁNTICO");
-        // (Ex. 9) Punto decimal sin dígitos después: "5." o "5.a"
         if (s.matches(".*\\.$") || s.matches(".*\\.[^0-9].*"))
             throw new LenguajeException(
                     "Error de Sintaxis Decimal: se detectó un punto en '" + s + "' pero falta el número después del punto.",
                     "ERROR DE SINTAXIS");
-        // (Ex. 10) Límite de dígitos — mensaje específico
         if (!s.matches("-?[0-9]{1,10}(\\.[0-9]{1,10})?")) {
             if (s.matches("-?[0-9]+(\\.[0-9]+)?"))
                 throw new LenguajeException(
@@ -542,9 +500,7 @@ public class InterfazLenguaje extends JFrame {
 
     private String getValVenti(String s) throws LenguajeException {
         s = s.trim();
-        // (Ex. 7) Conflicto de tipos — acepta cualquier tipo convertido a String
         if (memoria.containsKey(s)) return String.valueOf(memoria.get(s));
-        // Variable no definida
         if (s.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
             throw new LenguajeException("Error de Referencia: la variable '" + s + "' no ha sido definida.", "ERROR SEMÁNTICO");
         if ((!s.startsWith("\"") || !s.endsWith("\"")) && (!s.startsWith("'") || !s.endsWith("'")))
@@ -590,10 +546,6 @@ public class InterfazLenguaje extends JFrame {
         }
         imprimirEnConsola("\n--- Fin del Diccionario ---\n", FG_TEXT);
     }
-
-    // ════════════════════════════════════════════════════════════════════════════
-    //  MAIN
-    // ════════════════════════════════════════════════════════════════════════════
 
     public static void main(String[] args) {
         try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
