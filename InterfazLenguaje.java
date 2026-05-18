@@ -522,8 +522,14 @@ public class InterfazLenguaje extends JFrame {
                 + "|(\"[^\"]*\"|'[^']*')"
                 + "|([~+\\-*/;])"
                 + "|([a-zA-Z_][a-zA-Z0-9_]*)";
+                
+        String textoSinComentarios = String.join("\n",
+            java.util.Arrays.stream(getTextoEditor().split("\n"))
+                    .filter(l -> !l.trim().startsWith("#") && !l.trim().startsWith("//"))
+                    .toArray(String[]::new));
+
         Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(getTextoEditor());
+        Matcher matcher = pattern.matcher(textoSinComentarios);
 
         while (matcher.find()) {
             String lexema = matcher.group();
