@@ -245,25 +245,40 @@ public class InterfazLenguaje extends JFrame {
 
     private void generarTablaTokens() {
         modeloTabla.setRowCount(0);
-        String regex = "(alto|grande|venti)"
+
+        // Regex reales usados por el tokenizador y validadores internos
+        final String RX_KEYWORD    = "alto|grande|venti";
+        final String RX_GRANDE     = "-?[0-9]{1,10}\\.[0-9]{1,10}";
+        final String RX_ALTO       = "-?[0-9]{1,10}";
+        final String RX_VENTI      = "^(\"[^\"]*\"|'[^']*')$";
+        final String RX_OPERADOR   = "[~+\\-*/;]";
+        final String RX_IDENT      = "[a-zA-Z_][a-zA-Z0-9_]*";
+
+        // Eliminar líneas comentadas antes de tokenizar
+        String textoSinComentarios = String.join("\n",
+                java.util.Arrays.stream(getTextoEditor().split("\n"))
+                        .filter(l -> !l.trim().startsWith("#") && !l.trim().startsWith("//"))
+                        .toArray(String[]::new));
+
+        String regex = "(" + RX_KEYWORD + ")"
                 + "|([0-9]{1,10}\\.[0-9]{1,10})"
                 + "|([0-9]{1,10})"
                 + "|(\"[^\"]*\"|'[^']*')"
                 + "|([~+\\-*/;])"
                 + "|([a-zA-Z_][a-zA-Z0-9_]*)";
         Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(getTextoEditor());
+        Matcher matcher = pattern.matcher(textoSinComentarios);
 
         while (matcher.find()) {
             String lexema = matcher.group();
             String tipo = "", desc = "", res = "No";
 
-            if      (matcher.group(1) != null) { tipo = "TIPO_DATO";       desc = "(alto|grande|venti)";          res = "Sí"; }
-            else if (matcher.group(2) != null) { tipo = "LITERAL_GRANDE";  desc = "[0-9]{1,10}\\.[0-9]{1,10}"; }
-            else if (matcher.group(3) != null) { tipo = "LITERAL_ALTO";    desc = "[0-9]{1,10}"; }
-            else if (matcher.group(4) != null) { tipo = "LITERAL_VENTI";   desc = "\"[^\"]*\"|'[^']*'"; }
-            else if (matcher.group(5) != null) { tipo = "OPERADOR";        desc = "[~+\\-*/;]"; res = "Sí"; }
-            else if (matcher.group(6) != null) { tipo = "IDENTIFICADOR";   desc = "[a-zA-Z_][a-zA-Z0-9_]*"; }
+            if      (matcher.group(1) != null) { tipo = lexema.toUpperCase(); desc = RX_KEYWORD;  res = "Sí"; }
+            else if (matcher.group(2) != null) { tipo = "LITERAL_GRANDE";     desc = RX_GRANDE; }
+            else if (matcher.group(3) != null) { tipo = "LITERAL_ALTO";       desc = RX_ALTO; }
+            else if (matcher.group(4) != null) { tipo = "LITERAL_VENTI";      desc = RX_VENTI; }
+            else if (matcher.group(5) != null) { tipo = "OPERADOR";           desc = RX_OPERADOR; res = lexema.equals(";") ? "No" : "Sí"; }
+            else if (matcher.group(6) != null) { tipo = "IDENTIFICADOR";      desc = RX_IDENT; }
 
             modeloTabla.addRow(new Object[]{ tipo, lexema, desc, res });
         }
