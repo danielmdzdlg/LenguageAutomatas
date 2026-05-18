@@ -262,7 +262,7 @@ public class InterfazLenguaje extends JFrame {
             else if (matcher.group(2) != null) { tipo = "LITERAL_GRANDE";  desc = "[0-9]{1,10}\\.[0-9]{1,10}"; }
             else if (matcher.group(3) != null) { tipo = "LITERAL_ALTO";    desc = "[0-9]{1,10}"; }
             else if (matcher.group(4) != null) { tipo = "LITERAL_VENTI";   desc = "\"[^\"]*\"|'[^']*'"; }
-            else if (matcher.group(5) != null) { tipo = "OPERADOR";        desc = "[~+\\-*/;]"; res = lexema.equals(";") ? "No" : "Sí"; }
+            else if (matcher.group(5) != null) { tipo = "OPERADOR";        desc = "[~+\\-*/;]"; res = "Sí"; }
             else if (matcher.group(6) != null) { tipo = "IDENTIFICADOR";   desc = "[a-zA-Z_][a-zA-Z0-9_]*"; }
 
             modeloTabla.addRow(new Object[]{ tipo, lexema, desc, res });
