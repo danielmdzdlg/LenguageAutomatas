@@ -227,23 +227,21 @@ public class InterfazLenguaje extends JFrame {
     private void generarTablaTokens() {
         modeloTabla.setRowCount(0);
 
-        // Regex reales usados por el tokenizador y validadores internos
         final String RX_KEYWORD    = "alto|grande|venti";
         final String RX_GRANDE     = "-?[0-9]{1,10}\\.[0-9]{1,10}";
         final String RX_ALTO       = "-?[0-9]{1,10}";
-        final String RX_VENTI      = "^(\"[^\"]*\"|'[^']*')$";
+        final String RX_VENTI      = "^(\\\"[^\"]*\\\"|\\\'[^']*\\\')$";
         final String RX_OPERADOR   = "[~+\\-*/;]";
-        final String RX_IDENT      = "[a-zA-Z_][a-zA-Z0-9_]*";
+        final String RX_IDENT      = "([a-zA-Z_][a-zA-Z0-9_]*)";
 
-        // Eliminar líneas comentadas antes de tokenizar
         String textoSinComentarios = String.join("\n",
                 java.util.Arrays.stream(getTextoEditor().split("\n"))
                         .filter(l -> !l.trim().startsWith("#") && !l.trim().startsWith("//"))
                         .toArray(String[]::new));
 
         String regex = "(" + RX_KEYWORD + ")"
-                + "|([0-9]{1,10}\\.[0-9]{1,10})"
-                + "|([0-9]{1,10})"
+                + "|(" + RX_GRANDE + ")"
+                + "|(" + RX_ALTO + ")"
                 + "|(\"[^\"]*\"|'[^']*')"
                 + "|([~+\\-*/;])"
                 + "|([a-zA-Z_][a-zA-Z0-9_]*)";
@@ -522,7 +520,7 @@ public class InterfazLenguaje extends JFrame {
                 + "|(\"[^\"]*\"|'[^']*')"
                 + "|([~+\\-*/;])"
                 + "|([a-zA-Z_][a-zA-Z0-9_]*)";
-                
+
         String textoSinComentarios = String.join("\n",
             java.util.Arrays.stream(getTextoEditor().split("\n"))
                     .filter(l -> !l.trim().startsWith("#") && !l.trim().startsWith("//"))
