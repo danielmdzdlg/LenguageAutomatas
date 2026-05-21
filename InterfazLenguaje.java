@@ -103,11 +103,13 @@ public class InterfazLenguaje extends JFrame {
 
         JButton btnAnalizar = createModernButton("Generar Tabla de Tokens", BTN_BLUE, Color.WHITE);
         JButton btnEjecutar = createModernButton("Ejecutar Código", ACCENT_ORANGE, BG_MAIN);
+        JButton btnSintactico = createModernButton("Análisis Sintáctico", ACCENT_CYAN, BG_MAIN);
         JButton btnDiccionario = createModernButton("Ver Diccionario", BTN_TEAL, Color.WHITE);
         JButton btnLimpiar = createModernButton("Limpiar Todo", BTN_RED, Color.WHITE);
 
         panelBotones.add(btnAnalizar);
         panelBotones.add(btnEjecutar);
+        panelBotones.add(btnSintactico);
         panelBotones.add(btnDiccionario);
         panelBotones.add(btnLimpiar);
 
@@ -117,6 +119,7 @@ public class InterfazLenguaje extends JFrame {
 
         btnAnalizar.addActionListener(e -> generarTablaTokens());
         btnEjecutar.addActionListener(e -> ejecutarCodigoReal());
+        btnSintactico.addActionListener(e -> explicarCodigoDetallado());
         btnDiccionario.addActionListener(e -> mostrarDiccionario());
         btnLimpiar.addActionListener(e -> {
             txtCodigo.setText("");
@@ -371,7 +374,7 @@ public class InterfazLenguaje extends JFrame {
                 throw new LenguajeException(
                         "Error Semántico: la variable '" + nombre + "' ya fue declarada previamente.",
                         "ERROR SEMÁNTICO");
- 
+
             if (!tipo.equals("alto") && !tipo.equals("grande") && !tipo.equals("venti"))
                 throw new LenguajeException(
                         "Error de Tipo: tipo de dato '" + tipo + "' no reconocido. Usa 'alto', 'grande' o 'venti'.",
@@ -635,6 +638,285 @@ public class InterfazLenguaje extends JFrame {
             imprimirEnConsola(String.format("%-22s %-22s%n", lexema, tipo), c);
         }
         imprimirEnConsola("\n--- Fin del Diccionario ---\n", FG_TEXT);
+    }
+
+    private void explicarCodigoDetallado() {
+
+        txtConsola.setText("");
+
+        imprimirEnConsola(
+                "--- ANÁLISIS SINTÁCTICO DEL CÓDIGO ---\n\n",
+                ACCENT_CYAN);
+
+        String[] lineas = getTextoEditor().split("\n");
+
+        for (int i = 0; i < lineas.length; i++) {
+
+            String original = lineas[i];
+            String linea = original.trim();
+
+            imprimirEnConsola(
+                    "LÍNEA " + (i + 1) + ": " + original + "\n",
+                    FG_TEXT);
+
+            if (linea.isEmpty()) {
+
+                imprimirEnConsola(
+                        "→ Línea vacía.\n\n",
+                        SYN_COMMENT);
+
+                continue;
+            }
+
+            if (linea.startsWith("#") || linea.startsWith("//")) {
+
+                imprimirEnConsola(
+                        "→ Comentario detectado.\n\n",
+                        SYN_COMMENT);
+
+                continue;
+            }
+
+            if (!linea.endsWith(";")) {
+
+                imprimirEnConsola(
+                        "ERROR SINTÁCTICO: falta ';' al final.\n\n",
+                        BTN_RED);
+
+                continue;
+            }
+
+            String sinPuntoComa = linea.substring(0, linea.length() - 1).trim();
+
+            if (!sinPuntoComa.contains("~")) {
+
+                imprimirEnConsola(
+                        "ERROR SINTÁCTICO: falta operador '~'.\n\n",
+                        BTN_RED);
+
+                continue;
+            }
+
+            String[] partes = sinPuntoComa.split("~", 2);
+
+            String izquierda = partes[0].trim();
+            String derecha = partes[1].trim();
+
+            if (derecha.isEmpty()) {
+
+                imprimirEnConsola(
+                        "ERROR: no existe expresión después de '~'.\n\n",
+                        BTN_RED);
+
+                continue;
+            }
+
+            String[] tokensIzq = izquierda.split("\\s+");
+
+            String nombre = "";
+            String tipo = "";
+
+            boolean declaracion = false;
+
+            if (tokensIzq.length == 2) {
+
+                declaracion = true;
+
+                nombre = tokensIzq[0];
+                tipo = tokensIzq[1];
+
+                imprimirEnConsola(
+                        "TIPO DE INSTRUCCIÓN: DECLARACIÓN\n",
+                        ACCENT_GREEN);
+
+                imprimirEnConsola(
+                        "<expresión> → "
+                                + "<identificador> "
+                                + "<tipoDato> "
+                                + "<asignación> "
+                                + "<expresión> "
+                                + "<fin>\n\n",
+                        ACCENT_PINK);
+
+            } else if (tokensIzq.length == 1) {
+
+                declaracion = false;
+
+                nombre = tokensIzq[0];
+
+                imprimirEnConsola(
+                        "TIPO DE INSTRUCCIÓN: REASIGNACIÓN\n",
+                        ACCENT_GREEN);
+
+                imprimirEnConsola(
+                        "<expresión> → "
+                                + "<identificador> "
+                                + "<asignación> "
+                                + "<expresión> "
+                                + "<fin>\n\n",
+                        ACCENT_PINK);
+
+                if (!memoria.containsKey(nombre)) {
+
+                    imprimirEnConsola(
+                            "ERROR SEMÁNTICO: variable no declarada.\n\n",
+                            BTN_RED);
+
+                    continue;
+                }
+
+                Object valor = memoria.get(nombre);
+
+                if (valor instanceof Long || valor instanceof Integer)
+                    tipo = "alto";
+
+                else if (valor instanceof Double)
+                    tipo = "grande";
+
+                else if (valor instanceof String)
+                    tipo = "venti";
+
+            } else {
+
+                imprimirEnConsola(
+                        "ERROR SINTÁCTICO: lado izquierdo inválido.\n\n",
+                        BTN_RED);
+
+                continue;
+            }
+
+            imprimirEnConsola(
+                    "ANÁLISIS DE COMPONENTES:\n",
+                    ACCENT_CYAN);
+
+            imprimirEnConsola(
+                    nombre + " → identificador\n",
+                    FG_TEXT);
+
+            if (!nombre.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
+
+                imprimirEnConsola(
+                        "ERROR: identificador inválido.\n\n",
+                        BTN_RED);
+
+                continue;
+            }
+
+            if (nombre.equals("alto")
+                    || nombre.equals("grande")
+                    || nombre.equals("venti")) {
+
+                imprimirEnConsola(
+                        "ERROR: palabra reservada usada como variable.\n\n",
+                        BTN_RED);
+
+                continue;
+            }
+
+            if (declaracion) {
+
+                imprimirEnConsola(
+                        tipo + " → tipo de dato\n",
+                        ACCENT_PINK);
+
+                if (!tipo.equals("alto")
+                        && !tipo.equals("grande")
+                        && !tipo.equals("venti")) {
+
+                    imprimirEnConsola(
+                            "ERROR: tipo de dato desconocido.\n\n",
+                            BTN_RED);
+
+                    continue;
+                }
+            }
+
+            imprimirEnConsola(
+                    "~ → operador de asignación\n",
+                    ACCENT_ORANGE);
+
+            imprimirEnConsola(
+                    derecha + " → expresión\n",
+                    FG_TEXT);
+
+            imprimirEnConsola(
+                    "; → fin de instrucción\n\n",
+                    FG_TEXT);
+
+            explicarExpresion(derecha, tipo);
+
+            imprimirEnConsola(
+                    "\n----------------------------------------\n\n",
+                    SYN_COMMENT);
+        }
+
+        imprimirEnConsola(
+                "--- FIN DEL ANÁLISIS ---\n",
+                ACCENT_CYAN);
+    }
+
+    private void explicarExpresion(String exp, String tipo) {
+
+        imprimirEnConsola(
+                "ANÁLISIS DE EXPRESIÓN:\n",
+                ACCENT_CYAN);
+
+        String regex = "\"[^\"]*\"|'[^']*'"
+                + "|[a-zA-Z_][a-zA-Z0-9_]*"
+                + "|-?[0-9]+(\\.[0-9]+)?"
+                + "|[+\\-*/]";
+
+        Pattern pattern = Pattern.compile(regex);
+
+        Matcher matcher = pattern.matcher(exp);
+
+        while (matcher.find()) {
+
+            String token = matcher.group();
+
+            if (token.matches("[+\\-*/]")) {
+
+                imprimirEnConsola(
+                        token + " → operador\n",
+                        ACCENT_ORANGE);
+
+            } else if (token.matches("-?[0-9]+")) {
+
+                imprimirEnConsola(
+                        token + " → literal entero (alto)\n",
+                        SYN_NUMBER);
+
+            } else if (token.matches("-?[0-9]+\\.[0-9]+")) {
+
+                imprimirEnConsola(
+                        token + " → literal decimal (grande)\n",
+                        SYN_NUMBER);
+
+            } else if ((token.startsWith("\"") && token.endsWith("\""))
+                    || (token.startsWith("'") && token.endsWith("'"))) {
+
+                imprimirEnConsola(
+                        token + " → literal texto (venti)\n",
+                        SYN_STRING);
+
+            } else {
+
+                if (memoria.containsKey(token)) {
+
+                    imprimirEnConsola(
+                            token
+                                    + " → variable previamente declarada\n",
+                            ACCENT_GREEN);
+
+                } else {
+
+                    imprimirEnConsola(
+                            token
+                                    + " → identificador no declarado\n",
+                            BTN_RED);
+                }
+            }
+        }
     }
 
     public static void main(String[] args) {
