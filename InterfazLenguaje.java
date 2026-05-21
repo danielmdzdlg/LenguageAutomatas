@@ -20,20 +20,20 @@ public class InterfazLenguaje extends JFrame {
     private DefaultTableModel modeloTabla;
     private Map<String, Object> memoria = new HashMap<>();
 
-    private final Color BG_MAIN    = new Color(40,  42,  54);
-    private final Color BG_PANEL   = new Color(68,  71,  90);
-    private final Color FG_TEXT    = new Color(248, 248, 242);
-    private final Color ACCENT_CYAN  = new Color(139, 233, 253);
-    private final Color ACCENT_GREEN = new Color(80,  250, 123);
-    private final Color ACCENT_PINK  = new Color(255, 121, 198);
-    private final Color ACCENT_ORANGE= new Color(255, 184,  84);
-    private final Color BTN_RED    = new Color(255,  85,  85);
-    private final Color BTN_BLUE   = new Color(98,  114, 164);
-    private final Color BTN_TEAL   = new Color(62,  166, 147);
+    private final Color BG_MAIN = new Color(40, 42, 54);
+    private final Color BG_PANEL = new Color(68, 71, 90);
+    private final Color FG_TEXT = new Color(248, 248, 242);
+    private final Color ACCENT_CYAN = new Color(139, 233, 253);
+    private final Color ACCENT_GREEN = new Color(80, 250, 123);
+    private final Color ACCENT_PINK = new Color(255, 121, 198);
+    private final Color ACCENT_ORANGE = new Color(255, 184, 84);
+    private final Color BTN_RED = new Color(255, 85, 85);
+    private final Color BTN_BLUE = new Color(98, 114, 164);
+    private final Color BTN_TEAL = new Color(62, 166, 147);
 
-    private final Color SYN_STRING  = new Color(241, 250, 140);
-    private final Color SYN_NUMBER  = new Color(189, 147, 249);
-    private final Color SYN_COMMENT = new Color(98,  114, 164);
+    private final Color SYN_STRING = new Color(241, 250, 140);
+    private final Color SYN_NUMBER = new Color(189, 147, 249);
+    private final Color SYN_COMMENT = new Color(98, 114, 164);
 
     public InterfazLenguaje() {
         setTitle("Intérprete VGV");
@@ -44,13 +44,13 @@ public class InterfazLenguaje extends JFrame {
         setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill    = GridBagConstraints.BOTH;
-        gbc.insets  = new Insets(10, 15, 10, 15);
-        gbc.gridx   = 0;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(10, 15, 10, 15);
+        gbc.gridx = 0;
         gbc.weightx = 1.0;
 
-        Font fuenteCodigo  = new Font("Consolas",  Font.PLAIN, 16);
-        Font fuenteTitulos = new Font("Segoe UI",  Font.BOLD,  14);
+        Font fuenteCodigo = new Font("Consolas", Font.PLAIN, 16);
+        Font fuenteTitulos = new Font("Segoe UI", Font.BOLD, 14);
 
         txtCodigo = new JTextPane();
         txtCodigo.setFont(fuenteCodigo);
@@ -64,7 +64,7 @@ public class InterfazLenguaje extends JFrame {
         JPanel noWrapPanel = new JPanel(new BorderLayout());
         noWrapPanel.add(txtCodigo);
 
-        gbc.gridy   = 0;
+        gbc.gridy = 0;
         gbc.weighty = 0.42;
         add(createModernScrollPane(noWrapPanel, "Editor de Código", ACCENT_CYAN, fuenteTitulos), gbc);
 
@@ -85,8 +85,8 @@ public class InterfazLenguaje extends JFrame {
         header.setFont(fuenteTitulos);
         header.setPreferredSize(new Dimension(header.getWidth(), 32));
 
-        gbc.gridy   = 1;
-        gbc.weighty = 0.20;   // ← tabla más compacta
+        gbc.gridy = 1;
+        gbc.weighty = 0.20; // ← tabla más compacta
         add(createModernScrollPane(tablaTokens, "Tabla de Tokens", ACCENT_PINK, fuenteTitulos), gbc);
 
         txtConsola = new JTextPane();
@@ -94,24 +94,24 @@ public class InterfazLenguaje extends JFrame {
         txtConsola.setBackground(new Color(30, 31, 40));
         txtConsola.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        gbc.gridy   = 2;
+        gbc.gridy = 2;
         gbc.weighty = 0.28;
         add(createModernScrollPane(txtConsola, "Consola de Ejecución", ACCENT_GREEN, fuenteTitulos), gbc);
 
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         panelBotones.setBackground(BG_MAIN);
 
-        JButton btnAnalizar   = createModernButton("Generar Tabla de Tokens", BTN_BLUE,   Color.WHITE);
-        JButton btnEjecutar   = createModernButton("Ejecutar Código",          ACCENT_ORANGE, BG_MAIN);
-        JButton btnDiccionario= createModernButton("Ver Diccionario",           BTN_TEAL,   Color.WHITE);
-        JButton btnLimpiar    = createModernButton("Limpiar Todo",              BTN_RED,    Color.WHITE);
+        JButton btnAnalizar = createModernButton("Generar Tabla de Tokens", BTN_BLUE, Color.WHITE);
+        JButton btnEjecutar = createModernButton("Ejecutar Código", ACCENT_ORANGE, BG_MAIN);
+        JButton btnDiccionario = createModernButton("Ver Diccionario", BTN_TEAL, Color.WHITE);
+        JButton btnLimpiar = createModernButton("Limpiar Todo", BTN_RED, Color.WHITE);
 
         panelBotones.add(btnAnalizar);
         panelBotones.add(btnEjecutar);
         panelBotones.add(btnDiccionario);
         panelBotones.add(btnLimpiar);
 
-        gbc.gridy   = 3;
+        gbc.gridy = 3;
         gbc.weighty = 0.05;
         add(panelBotones, gbc);
 
@@ -127,32 +127,42 @@ public class InterfazLenguaje extends JFrame {
     }
 
     private void configurarEstilosCodigo() {
-        Style def      = txtCodigo.addStyle("Default",  null);
+        Style def = txtCodigo.addStyle("Default", null);
         StyleConstants.setForeground(def, FG_TEXT);
 
-        Style keyword  = txtCodigo.addStyle("Keyword",  null);
+        Style keyword = txtCodigo.addStyle("Keyword", null);
         StyleConstants.setForeground(keyword, ACCENT_PINK);
         StyleConstants.setBold(keyword, true);
 
-        Style number   = txtCodigo.addStyle("Number",   null);
+        Style number = txtCodigo.addStyle("Number", null);
         StyleConstants.setForeground(number, SYN_NUMBER);
 
-        Style string   = txtCodigo.addStyle("String",   null);
+        Style string = txtCodigo.addStyle("String", null);
         StyleConstants.setForeground(string, SYN_STRING);
 
         Style operator = txtCodigo.addStyle("Operator", null);
         StyleConstants.setForeground(operator, ACCENT_CYAN);
 
-        Style comment  = txtCodigo.addStyle("Comment",  null);
+        Style comment = txtCodigo.addStyle("Comment", null);
         StyleConstants.setForeground(comment, SYN_COMMENT);
         StyleConstants.setItalic(comment, true);
     }
 
     private void agregarListenerSintaxis() {
         txtCodigo.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) { aplicarColores(); }
-            @Override public void removeUpdate(DocumentEvent e) { aplicarColores(); }
-            @Override public void changedUpdate(DocumentEvent e) {}
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                aplicarColores();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                aplicarColores();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+            }
         });
     }
 
@@ -160,15 +170,18 @@ public class InterfazLenguaje extends JFrame {
         SwingUtilities.invokeLater(() -> {
             StyledDocument doc = txtCodigo.getStyledDocument();
             String text;
-            try { text = doc.getText(0, doc.getLength()); }
-            catch (BadLocationException e) { return; }
+            try {
+                text = doc.getText(0, doc.getLength());
+            } catch (BadLocationException e) {
+                return;
+            }
 
             doc.setCharacterAttributes(0, text.length(), txtCodigo.getStyle("Default"), true);
-            colorearRegex(text, doc, "([~+\\-*/;])",              "Operator");
-            colorearRegex(text, doc, "\\b\\d+(\\.\\d+)?\\b",      "Number");
+            colorearRegex(text, doc, "([~+\\-*/;])", "Operator");
+            colorearRegex(text, doc, "\\b\\d+(\\.\\d+)?\\b", "Number");
             colorearRegex(text, doc, "\\b(alto|grande|venti)\\b", "Keyword");
-            colorearRegex(text, doc, "\"[^\"]*\"|'[^']*'",         "String");
-            colorearRegex(text, doc, "(//.*|#.*)",                "Comment");
+            colorearRegex(text, doc, "\"[^\"]*\"|'[^']*'", "String");
+            colorearRegex(text, doc, "(//.*|#.*)", "Comment");
         });
     }
 
@@ -202,46 +215,59 @@ public class InterfazLenguaje extends JFrame {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setPreferredSize(new Dimension(210, 40));
         btn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { btn.setBackground(bg.brighter()); }
-            public void mouseExited (MouseEvent e) { btn.setBackground(bg); }
+            public void mouseEntered(MouseEvent e) {
+                btn.setBackground(bg.brighter());
+            }
+
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(bg);
+            }
         });
         return btn;
     }
 
     private void imprimirEnConsola(String mensaje, Color color) {
-        StyledDocument doc  = txtConsola.getStyledDocument();
+        StyledDocument doc = txtConsola.getStyledDocument();
         Style estilo = txtConsola.addStyle("cs", null);
         StyleConstants.setForeground(estilo, color);
         StyleConstants.setFontFamily(estilo, "Consolas");
         StyleConstants.setBold(estilo, true);
         StyleConstants.setFontSize(estilo, 14);
-        try { doc.insertString(doc.getLength(), mensaje, estilo); }
-        catch (BadLocationException e) { e.printStackTrace(); }
+        try {
+            doc.insertString(doc.getLength(), mensaje, estilo);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
     }
 
     private String getTextoEditor() {
-        try { return txtCodigo.getDocument().getText(0, txtCodigo.getDocument().getLength()); }
-        catch (BadLocationException e) { return ""; }
+        try {
+            return txtCodigo.getDocument().getText(0, txtCodigo.getDocument().getLength());
+        } catch (BadLocationException e) {
+            return "";
+        }
     }
 
     private void generarTablaTokens() {
         modeloTabla.setRowCount(0);
 
-        final String RX_KEYWORD    = "alto|grande|venti";
-        final String RX_GRANDE     = "-?[0-9]{1,10}\\.[0-9]{1,10}";
-        final String RX_ALTO       = "-?[0-9]{1,10}";
-        final String RX_VENTI      = "^(\\\"[^\"]*\\\"|\\\'[^']*\\\')$";
-        final String RX_OPERADOR   = "[~+\\-*/;]";
-        final String RX_IDENT      = "([a-zA-Z_][a-zA-Z0-9_]*)";
+        // Regex reales usados por el tokenizador y validadores internos
+        final String RX_KEYWORD = "alto|grande|venti";
+        final String RX_GRANDE = "-?[0-9]{1,10}\\.[0-9]{1,10}";
+        final String RX_ALTO = "-?[0-9]{1,10}";
+        final String RX_VENTI = "^(\"[^\"]*\"|'[^']*')$";
+        final String RX_OPERADOR = "[~+\\-*/;]";
+        final String RX_IDENT = "[a-zA-Z_][a-zA-Z0-9_]*";
 
+        // Eliminar líneas comentadas antes de tokenizar
         String textoSinComentarios = String.join("\n",
                 java.util.Arrays.stream(getTextoEditor().split("\n"))
                         .filter(l -> !l.trim().startsWith("#") && !l.trim().startsWith("//"))
                         .toArray(String[]::new));
 
         String regex = "(" + RX_KEYWORD + ")"
-                + "|(" + RX_GRANDE + ")"
-                + "|(" + RX_ALTO + ")"
+                + "|([0-9]{1,10}\\.[0-9]{1,10})"
+                + "|([0-9]{1,10})"
                 + "|(\"[^\"]*\"|'[^']*')"
                 + "|([~+\\-*/;])"
                 + "|([a-zA-Z_][a-zA-Z0-9_]*)";
@@ -252,14 +278,29 @@ public class InterfazLenguaje extends JFrame {
             String lexema = matcher.group();
             String tipo = "", desc = "", res = "No";
 
-            if      (matcher.group(1) != null) { tipo = lexema.toUpperCase(); desc = RX_KEYWORD;  res = "Sí"; }
-            else if (matcher.group(2) != null) { tipo = "LITERAL_GRANDE";     desc = RX_GRANDE; }
-            else if (matcher.group(3) != null) { tipo = "LITERAL_ALTO";       desc = RX_ALTO; }
-            else if (matcher.group(4) != null) { tipo = "LITERAL_VENTI";      desc = RX_VENTI; }
-            else if (matcher.group(5) != null) { tipo = "OPERADOR";           desc = RX_OPERADOR; res = "Sí"; }
-            else if (matcher.group(6) != null) { tipo = "IDENTIFICADOR";      desc = RX_IDENT; }
+            if (matcher.group(1) != null) {
+                tipo = lexema.toUpperCase();
+                desc = RX_KEYWORD;
+                res = "Sí";
+            } else if (matcher.group(2) != null) {
+                tipo = "LITERAL_GRANDE";
+                desc = RX_GRANDE;
+            } else if (matcher.group(3) != null) {
+                tipo = "LITERAL_ALTO";
+                desc = RX_ALTO;
+            } else if (matcher.group(4) != null) {
+                tipo = "LITERAL_VENTI";
+                desc = RX_VENTI;
+            } else if (matcher.group(5) != null) {
+                tipo = "OPERADOR";
+                desc = RX_OPERADOR;
+                res = "Sí";
+            } else if (matcher.group(6) != null) {
+                tipo = "IDENTIFICADOR";
+                desc = RX_IDENT;
+            }
 
-            modeloTabla.addRow(new Object[]{ tipo, lexema, desc, res });
+            modeloTabla.addRow(new Object[] { tipo, lexema, desc, res });
         }
     }
 
@@ -271,7 +312,8 @@ public class InterfazLenguaje extends JFrame {
 
         for (int i = 0; i < lineas.length; i++) {
             String linea = lineas[i].trim();
-            if (linea.isEmpty() || linea.startsWith("#")) continue;
+            if (linea.isEmpty() || linea.startsWith("#"))
+                continue;
             try {
                 procesarLinea(linea);
             } catch (LenguajeException ex) {
@@ -289,27 +331,30 @@ public class InterfazLenguaje extends JFrame {
 
     private void procesarLinea(String linea) throws LenguajeException {
         if (!linea.endsWith(";"))
-            throw new LenguajeException("Error de sintaxis: falta ';' al final de la instrucción.", "ERROR DE SINTAXIS");
+            throw new LenguajeException("Error de sintaxis: falta ';' al final de la instrucción.",
+                    "ERROR DE SINTAXIS");
 
         linea = linea.substring(0, linea.length() - 1).trim();
 
         if (!linea.contains("~"))
             throw new LenguajeException("Error de Sintaxis: falta el operador de asignación '~'.", "ERROR DE SINTAXIS");
 
-        String[] partes  = linea.split("~", 2);
-        String   izq     = partes[0].trim();
-        String   exp     = partes.length > 1 ? partes[1].trim() : "";
+        String[] partes = linea.split("~", 2);
+        String izq = partes[0].trim();
+        String exp = partes.length > 1 ? partes[1].trim() : "";
         String[] tokensIzq = izq.split("\\s+");
 
         if (exp.isEmpty())
-            throw new LenguajeException("Error de Sintaxis: no hay valor asignado después de '~'.", "ERROR DE SINTAXIS");
+            throw new LenguajeException("Error de Sintaxis: no hay valor asignado después de '~'.",
+                    "ERROR DE SINTAXIS");
 
-        String tipo   = "";
+        String tipo = "";
         String nombre = "";
 
         if (tokensIzq.length == 2) {
-            tipo   = tokensIzq[0];
-            nombre = tokensIzq[1];
+
+            nombre = tokensIzq[0];
+            tipo = tokensIzq[1];
 
             if (!nombre.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
                 throw new LenguajeException(
@@ -318,19 +363,19 @@ public class InterfazLenguaje extends JFrame {
 
             if (nombre.equals("alto") || nombre.equals("grande") || nombre.equals("venti"))
                 throw new LenguajeException(
-                        "Error Semántico: no puedes usar la palabra reservada '" + nombre + "' como nombre de variable.",
+                        "Error Semántico: no puedes usar la palabra reservada '" + nombre
+                                + "' como nombre de variable.",
                         "ERROR SEMÁNTICO");
 
             if (memoria.containsKey(nombre))
                 throw new LenguajeException(
                         "Error Semántico: la variable '" + nombre + "' ya fue declarada previamente.",
                         "ERROR SEMÁNTICO");
-
+ 
             if (!tipo.equals("alto") && !tipo.equals("grande") && !tipo.equals("venti"))
                 throw new LenguajeException(
                         "Error de Tipo: tipo de dato '" + tipo + "' no reconocido. Usa 'alto', 'grande' o 'venti'.",
                         "ERROR DE TIPO");
-
         } else if (tokensIzq.length == 1) {
             nombre = tokensIzq[0];
 
@@ -350,9 +395,12 @@ public class InterfazLenguaje extends JFrame {
                         "ERROR SEMÁNTICO");
 
             Object val = memoria.get(nombre);
-            if      (val instanceof Long)   tipo = "alto";
-            else if (val instanceof Double) tipo = "grande";
-            else if (val instanceof String) tipo = "venti";
+            if (val instanceof Long)
+                tipo = "alto";
+            else if (val instanceof Double)
+                tipo = "grande";
+            else if (val instanceof String)
+                tipo = "venti";
 
         } else {
             throw new LenguajeException(
@@ -388,15 +436,25 @@ public class InterfazLenguaje extends JFrame {
         exp = exp.trim();
         // (Ex. 5) Operadores al final sin operando
         if (exp.matches(".*[+\\-*/]\\s*$"))
-            throw new LenguajeException("Error de Sintaxis: falta un operando al final de la expresión.", "ERROR DE SINTAXIS");
+            throw new LenguajeException("Error de Sintaxis: falta un operando al final de la expresión.",
+                    "ERROR DE SINTAXIS");
         // (Ex. 5) Operadores consecutivos/repetidos
         if (exp.matches(".*[+\\-*/]{2,}.*"))
             throw new LenguajeException(
                     "Error de Sintaxis: operadores consecutivos en la expresión '" + exp + "'.",
                     "ERROR DE SINTAXIS");
-        if (exp.contains("+")) { String[] p = exp.split("\\+", 2); return getValInt(p[0]) + evaluarInt(p[1]); }
-        if (exp.contains("-")) { String[] p = exp.split("-",    2); return getValInt(p[0]) - evaluarInt(p[1]); }
-        if (exp.contains("*")) { String[] p = exp.split("\\*",  2); return getValInt(p[0]) * evaluarInt(p[1]); }
+        if (exp.contains("+")) {
+            String[] p = exp.split("\\+", 2);
+            return getValInt(p[0]) + evaluarInt(p[1]);
+        }
+        if (exp.contains("-")) {
+            String[] p = exp.split("-", 2);
+            return getValInt(p[0]) - evaluarInt(p[1]);
+        }
+        if (exp.contains("*")) {
+            String[] p = exp.split("\\*", 2);
+            return getValInt(p[0]) * evaluarInt(p[1]);
+        }
         if (exp.contains("/")) {
             String[] p = exp.split("/", 2);
             long divisor = evaluarInt(p[1]);
@@ -410,14 +468,24 @@ public class InterfazLenguaje extends JFrame {
     private double evaluarGrande(String exp) throws LenguajeException {
         exp = exp.trim();
         if (exp.matches(".*[+\\-*/]\\s*$"))
-            throw new LenguajeException("Error de Sintaxis: falta un operando al final de la expresión.", "ERROR DE SINTAXIS");
+            throw new LenguajeException("Error de Sintaxis: falta un operando al final de la expresión.",
+                    "ERROR DE SINTAXIS");
         if (exp.matches(".*[+\\-*/]{2,}.*"))
             throw new LenguajeException(
                     "Error de Sintaxis: operadores consecutivos en la expresión '" + exp + "'.",
                     "ERROR DE SINTAXIS");
-        if (exp.contains("+")) { String[] p = exp.split("\\+", 2); return getValGrande(p[0]) + evaluarGrande(p[1]); }
-        if (exp.contains("-")) { String[] p = exp.split("-",    2); return getValGrande(p[0]) - evaluarGrande(p[1]); }
-        if (exp.contains("*")) { String[] p = exp.split("\\*",  2); return getValGrande(p[0]) * evaluarGrande(p[1]); }
+        if (exp.contains("+")) {
+            String[] p = exp.split("\\+", 2);
+            return getValGrande(p[0]) + evaluarGrande(p[1]);
+        }
+        if (exp.contains("-")) {
+            String[] p = exp.split("-", 2);
+            return getValGrande(p[0]) - evaluarGrande(p[1]);
+        }
+        if (exp.contains("*")) {
+            String[] p = exp.split("\\*", 2);
+            return getValGrande(p[0]) * evaluarGrande(p[1]);
+        }
         if (exp.contains("/")) {
             String[] p = exp.split("/", 2);
             double divisor = evaluarGrande(p[1]);
@@ -452,16 +520,19 @@ public class InterfazLenguaje extends JFrame {
             return ((Number) val).longValue();
         }
         if (s.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
-            throw new LenguajeException("Error de Referencia: la variable '" + s + "' no ha sido definida.", "ERROR SEMÁNTICO");
+            throw new LenguajeException("Error de Referencia: la variable '" + s + "' no ha sido definida.",
+                    "ERROR SEMÁNTICO");
         if (s.contains("."))
             throw new LenguajeException(
                     "Error de Tipo: un valor 'alto' no puede tener decimales (" + s + "). Usa 'grande'.",
                     "ERROR DE TIPO");
         if (!s.matches("-?[0-9]+"))
-            throw new LenguajeException("Sintaxis Inválida: '" + s + "' no es un número entero válido.", "ERROR DE SINTAXIS");
+            throw new LenguajeException("Sintaxis Inválida: '" + s + "' no es un número entero válido.",
+                    "ERROR DE SINTAXIS");
         // (Ex. 11) Overflow
-        try { return Long.parseLong(s); }
-        catch (NumberFormatException e) {
+        try {
+            return Long.parseLong(s);
+        } catch (NumberFormatException e) {
             throw new LenguajeException(
                     "Desbordamiento: el número '" + s + "' excede los 10 dígitos permitidos para 'alto'.",
                     "ERROR DE LÍMITES");
@@ -472,17 +543,21 @@ public class InterfazLenguaje extends JFrame {
         s = s.trim();
         if (memoria.containsKey(s)) {
             Object val = memoria.get(s);
-            if (val instanceof Double)  return (double) val;
-            if (val instanceof Long || val instanceof Integer) return ((Number) val).doubleValue(); // grande acepta enteros
+            if (val instanceof Double)
+                return (double) val;
+            if (val instanceof Long || val instanceof Integer)
+                return ((Number) val).doubleValue(); // grande acepta enteros
             throw new LenguajeException(
                     "Conflicto de Tipos: la variable '" + s + "' no es numérica.",
                     "ERROR DE TIPO");
         }
         if (s.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
-            throw new LenguajeException("Error de Referencia: la variable '" + s + "' no ha sido definida.", "ERROR SEMÁNTICO");
+            throw new LenguajeException("Error de Referencia: la variable '" + s + "' no ha sido definida.",
+                    "ERROR SEMÁNTICO");
         if (s.matches(".*\\.$") || s.matches(".*\\.[^0-9].*"))
             throw new LenguajeException(
-                    "Error de Sintaxis Decimal: se detectó un punto en '" + s + "' pero falta el número después del punto.",
+                    "Error de Sintaxis Decimal: se detectó un punto en '" + s
+                            + "' pero falta el número después del punto.",
                     "ERROR DE SINTAXIS");
         if (!s.matches("-?[0-9]{1,10}(\\.[0-9]{1,10})?")) {
             if (s.matches("-?[0-9]+(\\.[0-9]+)?"))
@@ -498,12 +573,15 @@ public class InterfazLenguaje extends JFrame {
 
     private String getValVenti(String s) throws LenguajeException {
         s = s.trim();
-        if (memoria.containsKey(s)) return String.valueOf(memoria.get(s));
+        if (memoria.containsKey(s))
+            return String.valueOf(memoria.get(s));
         if (s.matches("^[a-zA-Z_][a-zA-Z0-9_]*$"))
-            throw new LenguajeException("Error de Referencia: la variable '" + s + "' no ha sido definida.", "ERROR SEMÁNTICO");
+            throw new LenguajeException("Error de Referencia: la variable '" + s + "' no ha sido definida.",
+                    "ERROR SEMÁNTICO");
         if ((!s.startsWith("\"") || !s.endsWith("\"")) && (!s.startsWith("'") || !s.endsWith("'")))
             throw new LenguajeException(
-                    "Error de Sintaxis 'venti': el texto '" + s + "' debe estar encerrado entre comillas dobles o simples.",
+                    "Error de Sintaxis 'venti': el texto '" + s
+                            + "' debe estar encerrado entre comillas dobles o simples.",
                     "ERROR DE SINTAXIS");
         return s.substring(1, s.length() - 1);
     }
@@ -522,38 +600,48 @@ public class InterfazLenguaje extends JFrame {
                 + "|([a-zA-Z_][a-zA-Z0-9_]*)";
 
         String textoSinComentarios = String.join("\n",
-            java.util.Arrays.stream(getTextoEditor().split("\n"))
-                    .filter(l -> !l.trim().startsWith("#") && !l.trim().startsWith("//"))
-                    .toArray(String[]::new));
+                java.util.Arrays.stream(getTextoEditor().split("\n"))
+                        .filter(l -> !l.trim().startsWith("#") && !l.trim().startsWith("//"))
+                        .toArray(String[]::new));
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(textoSinComentarios);
 
         while (matcher.find()) {
             String lexema = matcher.group();
-            String tipo   = "";
-            if      (matcher.group(1) != null) tipo = "palabra reservada";
-            else if (matcher.group(2) != null) tipo = "constante grande";
-            else if (matcher.group(3) != null) tipo = "constante alto";
-            else if (matcher.group(4) != null) tipo = "constante venti";
+            String tipo = "";
+            if (matcher.group(1) != null)
+                tipo = "palabra reservada";
+            else if (matcher.group(2) != null)
+                tipo = "constante grande";
+            else if (matcher.group(3) != null)
+                tipo = "constante alto";
+            else if (matcher.group(4) != null)
+                tipo = "constante venti";
             else if (matcher.group(5) != null) {
-                if (lexema.equals("~"))   tipo = "operador asignación";
-                else if (lexema.equals(";")) tipo = "break";
-                else                      tipo = "operador aritmético";
-            } else if (matcher.group(6) != null) tipo = "identificador";
+                if (lexema.equals("~"))
+                    tipo = "operador asignación";
+                else if (lexema.equals(";"))
+                    tipo = "break";
+                else
+                    tipo = "operador aritmético";
+            } else if (matcher.group(6) != null)
+                tipo = "identificador";
 
             Color c = tipo.equals("palabra reservada") ? ACCENT_PINK
-                    : tipo.equals("identificador")     ? ACCENT_CYAN
-                    : tipo.startsWith("operador")       ? ACCENT_ORANGE
-                    : FG_TEXT;
+                    : tipo.equals("identificador") ? ACCENT_CYAN
+                            : tipo.startsWith("operador") ? ACCENT_ORANGE
+                                    : FG_TEXT;
             imprimirEnConsola(String.format("%-22s %-22s%n", lexema, tipo), c);
         }
         imprimirEnConsola("\n--- Fin del Diccionario ---\n", FG_TEXT);
     }
 
     public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
-        catch (Exception ignored) {}
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {
+        }
         SwingUtilities.invokeLater(() -> new InterfazLenguaje().setVisible(true));
     }
 }
