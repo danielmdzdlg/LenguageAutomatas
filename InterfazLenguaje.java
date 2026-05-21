@@ -103,13 +103,13 @@ public class InterfazLenguaje extends JFrame {
 
         JButton btnAnalizar = createModernButton("Generar Tabla de Tokens", BTN_BLUE, Color.WHITE);
         JButton btnEjecutar = createModernButton("Ejecutar Código", ACCENT_ORANGE, BG_MAIN);
-        JButton btnSintactico = createModernButton("Análisis Sintáctico", ACCENT_CYAN, BG_MAIN);
+        JButton btnGramatical = createModernButton("Análisis Gramático", ACCENT_CYAN, BG_MAIN);
         JButton btnDiccionario = createModernButton("Ver Diccionario", BTN_TEAL, Color.WHITE);
         JButton btnLimpiar = createModernButton("Limpiar Todo", BTN_RED, Color.WHITE);
 
         panelBotones.add(btnAnalizar);
         panelBotones.add(btnEjecutar);
-        panelBotones.add(btnSintactico);
+        panelBotones.add(btnGramatical);
         panelBotones.add(btnDiccionario);
         panelBotones.add(btnLimpiar);
 
@@ -119,7 +119,7 @@ public class InterfazLenguaje extends JFrame {
 
         btnAnalizar.addActionListener(e -> generarTablaTokens());
         btnEjecutar.addActionListener(e -> ejecutarCodigoReal());
-        btnSintactico.addActionListener(e -> explicarCodigoDetallado());
+        btnGramatical.addActionListener(e -> explicarCodigoDetallado());
         btnDiccionario.addActionListener(e -> mostrarDiccionario());
         btnLimpiar.addActionListener(e -> {
             txtCodigo.setText("");
@@ -338,6 +338,16 @@ public class InterfazLenguaje extends JFrame {
                     "ERROR DE SINTAXIS");
 
         linea = linea.substring(0, linea.length() - 1).trim();
+        if (linea.startsWith("IF") || linea.startsWith("If") || linea.startsWith("iF")) {
+            throw new LenguajeException(
+                    "Error de Sintaxis: la palabra reservada 'if' debe escribirse en minúsculas.",
+                    "ERROR DE SINTAXIS");
+        }
+
+        if (linea.startsWith("if")) {
+            procesarIf(linea);
+            return;
+        }
 
         if (!linea.contains("~"))
             throw new LenguajeException("Error de Sintaxis: falta el operador de asignación '~'.", "ERROR DE SINTAXIS");
@@ -433,6 +443,98 @@ public class InterfazLenguaje extends JFrame {
                 break;
             }
         }
+    }
+
+    private void procesarIf(String linea) throws LenguajeException {
+
+        String condicion = linea.substring(2).trim();
+
+        if (condicion.isEmpty()) {
+            throw new LenguajeException(
+                    "Error de Sintaxis: falta la condición después de 'if'.",
+                    "ERROR DE SINTAXIS");
+        }
+
+        String[] operadores = { "==", "!=", ">=", "<=", ">", "<" };
+        String operadorEncontrado = "";
+
+        for (String op : operadores) {
+            if (condicion.contains(op)) {
+                operadorEncontrado = op;
+                break;
+            }
+        }
+
+        if (operadorEncontrado.isEmpty()) {
+            throw new LenguajeException(
+                    "Error de Sintaxis: el if necesita un operador de comparación.",
+                    "ERROR DE SINTAXIS");
+        }
+
+        String[] partes = condicion.split(Pattern.quote(operadorEncontrado), 2);
+
+        if (partes.length < 2 || partes[0].trim().isEmpty() || partes[1].trim().isEmpty()) {
+            throw new LenguajeException(
+                    "Error de Sintaxis: el if necesita dos datos para comparar.",
+                    "ERROR DE SINTAXIS");
+        }
+
+        String dato1 = partes[0].trim();
+        String dato2 = partes[1].trim();
+
+        double valor1 = obtenerValorComparacion(dato1);
+        double valor2 = obtenerValorComparacion(dato2);
+
+        boolean resultado = false;
+
+        switch (operadorEncontrado) {
+            case "==":
+                resultado = valor1 == valor2;
+                break;
+            case "!=":
+                resultado = valor1 != valor2;
+                break;
+            case ">":
+                resultado = valor1 > valor2;
+                break;
+            case "<":
+                resultado = valor1 < valor2;
+                break;
+            case ">=":
+                resultado = valor1 >= valor2;
+                break;
+            case "<=":
+                resultado = valor1 <= valor2;
+                break;
+        }
+
+        imprimirEnConsola(
+                "[IF] Comparación: " + dato1 + " " + operadorEncontrado + " " + dato2
+                        + " → " + resultado + "\n",
+                resultado ? ACCENT_GREEN : BTN_RED);
+    }
+
+    private double obtenerValorComparacion(String dato) throws LenguajeException {
+
+        if (memoria.containsKey(dato)) {
+            Object valor = memoria.get(dato);
+
+            if (valor instanceof Number) {
+                return ((Number) valor).doubleValue();
+            }
+
+            throw new LenguajeException(
+                    "Error de Tipo: el if solo puede comparar valores numéricos.",
+                    "ERROR DE TIPO");
+        }
+
+        if (dato.matches("-?[0-9]+(\\.[0-9]+)?")) {
+            return Double.parseDouble(dato);
+        }
+
+        throw new LenguajeException(
+                "Error Semántico: el dato '" + dato + "' no existe o no es numérico.",
+                "ERROR SEMÁNTICO");
     }
 
     private long evaluarInt(String exp) throws LenguajeException {
@@ -729,14 +831,17 @@ public class InterfazLenguaje extends JFrame {
                         "TIPO DE INSTRUCCIÓN: DECLARACIÓN\n",
                         ACCENT_GREEN);
 
-                imprimirEnConsola(
-                        "<expresión> → "
-                                + "<identificador> "
-                                + "<tipoDato> "
-                                + "<asignación> "
-                                + "<expresión> "
-                                + "<fin>\n\n",
-                        ACCENT_PINK);
+                String reglaSintactica = "";
+
+                if (tipo.equals("alto")) {
+                    reglaSintactica = "<expresión>: <identificador>: <tipo de dato>: <asignación>: <expresión>: <literal alto>: <cierre>";
+                } else if (tipo.equals("grande")) {
+                    reglaSintactica = "<expresión>: <identificador>: <tipo de dato>: <asignación>: <expresión>: <literal grande>: <cierre>";
+                } else if (tipo.equals("venti")) {
+                    reglaSintactica = "<expresión>: <identificador>: <tipo de dato>: <asignación>: <expresión>: <literal venti>: <cierre>";
+                }
+
+                imprimirEnConsola(reglaSintactica + "\n\n", ACCENT_PINK);
 
             } else if (tokensIzq.length == 1) {
 
@@ -748,13 +853,17 @@ public class InterfazLenguaje extends JFrame {
                         "TIPO DE INSTRUCCIÓN: REASIGNACIÓN\n",
                         ACCENT_GREEN);
 
-                imprimirEnConsola(
-                        "<expresión> → "
-                                + "<identificador> "
-                                + "<asignación> "
-                                + "<expresión> "
-                                + "<fin>\n\n",
-                        ACCENT_PINK);
+                String reglaSintactica = "";
+
+                if (tipo.equals("alto")) {
+                    reglaSintactica = "<expresión>: <identificador>: <tipo de dato>: <asignación>: <expresión>: <literal alto>: <cierre>";
+                } else if (tipo.equals("grande")) {
+                    reglaSintactica = "<expresión>: <identificador>: <tipo de dato>: <asignación>: <expresión>: <literal grande>: <cierre>";
+                } else if (tipo.equals("venti")) {
+                    reglaSintactica = "<expresión>: <identificador>: <tipo de dato>: <asignación>: <expresión>: <literal venti>: <cierre>";
+                }
+
+                imprimirEnConsola(reglaSintactica + "\n\n", ACCENT_PINK);
 
                 if (!memoria.containsKey(nombre)) {
 
