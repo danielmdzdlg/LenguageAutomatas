@@ -747,7 +747,7 @@ public class InterfazLenguaje extends JFrame {
         txtConsola.setText("");
 
         imprimirEnConsola(
-                "--- ANÁLISIS SINTÁCTICO DEL CÓDIGO ---\n\n",
+                "--- ANÁLISIS GRAMÁTICO DEL CÓDIGO ---\n\n",
                 ACCENT_CYAN);
 
         String[] lineas = getTextoEditor().split("\n");
@@ -782,7 +782,7 @@ public class InterfazLenguaje extends JFrame {
             if (!linea.endsWith(";")) {
 
                 imprimirEnConsola(
-                        "ERROR SINTÁCTICO: falta ';' al final.\n\n",
+                        "ERROR DE SINTAXIS: falta ';' al final.\n\n",
                         BTN_RED);
 
                 continue;
@@ -793,7 +793,7 @@ public class InterfazLenguaje extends JFrame {
             if (!sinPuntoComa.contains("~")) {
 
                 imprimirEnConsola(
-                        "ERROR SINTÁCTICO: falta operador '~'.\n\n",
+                        "ERROR DE SINTAXIS: falta operador '~'.\n\n",
                         BTN_RED);
 
                 continue;
@@ -888,7 +888,7 @@ public class InterfazLenguaje extends JFrame {
             } else {
 
                 imprimirEnConsola(
-                        "ERROR SINTÁCTICO: lado izquierdo inválido.\n\n",
+                        "ERROR DE SINTAXIS: lado izquierdo inválido.\n\n",
                         BTN_RED);
 
                 continue;
