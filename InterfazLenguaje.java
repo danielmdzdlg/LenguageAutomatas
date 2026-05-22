@@ -446,13 +446,27 @@ public class InterfazLenguaje extends JFrame {
     }
 
     private void procesarIf(String linea) throws LenguajeException {
+        // Expresión Regular para asegurar la gramática: if ( expresión ) { bloque } [ else { bloque } ]
+        String patronIf = "^if\\s*\\(\\s*(.*?)\\s*\\)\\s*\\{(.*?)\\}(?:\\s*else\\s*\\{(.*?)\\})?$";
+        Pattern pattern = Pattern.compile(patronIf, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(linea);
 
-        String condicion = linea.substring(2).trim();
+        if (!matcher.matches()) {
+            throw new LenguajeException(
+                "Error de Sintaxis: Estructura mal formada. Se esperaba: if (condición) { bloque } [else { bloque }]",
+                "ERROR DE SINTAXIS"
+            );
+        }
+
+        String condicion = matcher.group(1).trim();
+        String bloqueIf = matcher.group(2).trim();
+        String bloqueElse = matcher.group(3); 
 
         if (condicion.isEmpty()) {
             throw new LenguajeException(
-                    "Error de Sintaxis: falta la condición después de 'if'.",
-                    "ERROR DE SINTAXIS");
+                "Error de Sintaxis: El 'if' requiere una condición entre los paréntesis.",
+                "ERROR DE SINTAXIS"
+            );
         }
 
         String[] operadores = { "==", "!=", ">=", "<=", ">", "<" };
@@ -467,16 +481,17 @@ public class InterfazLenguaje extends JFrame {
 
         if (operadorEncontrado.isEmpty()) {
             throw new LenguajeException(
-                    "Error de Sintaxis: el if necesita un operador de comparación.",
-                    "ERROR DE SINTAXIS");
+                "Error de Sintaxis: Falta operador de comparación (==, >, <, etc.) en la condición.",
+                "ERROR DE SINTAXIS"
+            );
         }
 
         String[] partes = condicion.split(Pattern.quote(operadorEncontrado), 2);
-
         if (partes.length < 2 || partes[0].trim().isEmpty() || partes[1].trim().isEmpty()) {
             throw new LenguajeException(
-                    "Error de Sintaxis: el if necesita dos datos para comparar.",
-                    "ERROR DE SINTAXIS");
+                "Error de Sintaxis: El 'if' necesita dos datos para comparar.",
+                "ERROR DE SINTAXIS"
+            );
         }
 
         String dato1 = partes[0].trim();
@@ -488,30 +503,37 @@ public class InterfazLenguaje extends JFrame {
         boolean resultado = false;
 
         switch (operadorEncontrado) {
-            case "==":
-                resultado = valor1 == valor2;
-                break;
-            case "!=":
-                resultado = valor1 != valor2;
-                break;
-            case ">":
-                resultado = valor1 > valor2;
-                break;
-            case "<":
-                resultado = valor1 < valor2;
-                break;
-            case ">=":
-                resultado = valor1 >= valor2;
-                break;
-            case "<=":
-                resultado = valor1 <= valor2;
-                break;
+            case "==": resultado = valor1 == valor2; break;
+            case "!=": resultado = valor1 != valor2; break;
+            case ">":  resultado = valor1 > valor2; break;
+            case "<":  resultado = valor1 < valor2; break;
+            case ">=": resultado = valor1 >= valor2; break;
+            case "<=": resultado = valor1 <= valor2; break;
         }
 
         imprimirEnConsola(
-                "[IF] Comparación: " + dato1 + " " + operadorEncontrado + " " + dato2
-                        + " → " + resultado + "\n",
-                resultado ? ACCENT_GREEN : BTN_RED);
+            "[IF] Comparación: " + dato1 + " " + operadorEncontrado + " " + dato2 + " → " + resultado + "\n",
+            resultado ? ACCENT_GREEN : ACCENT_ORANGE
+        );
+
+        if (resultado) {
+            if (!bloqueIf.isEmpty()) {
+                imprimirEnConsola("   └─ Ejecutando bloque IF...\n", FG_TEXT);
+                ejecutarBloque(bloqueIf);
+            }
+        } else if (bloqueElse != null && !bloqueElse.trim().isEmpty()) {
+            imprimirEnConsola("   └─ Ejecutando bloque ELSE...\n", FG_TEXT);
+            ejecutarBloque(bloqueElse);
+        }
+    }
+
+    private void ejecutarBloque(String bloque) throws LenguajeException {
+        String[] sentencias = bloque.split(";");
+        for (String sent : sentencias) {
+            if (!sent.trim().isEmpty()) {
+                procesarLinea(sent.trim() + ";");
+            }
+        }
     }
 
     private double obtenerValorComparacion(String dato) throws LenguajeException {
@@ -747,7 +769,7 @@ public class InterfazLenguaje extends JFrame {
         txtConsola.setText("");
 
         imprimirEnConsola(
-                "--- ANÁLISIS GRAMÁTICO DEL CÓDIGO ---\n\n",
+                "--- ANÁLISIS SINTÁCTICO DEL CÓDIGO ---\n\n",
                 ACCENT_CYAN);
 
         String[] lineas = getTextoEditor().split("\n");
@@ -782,7 +804,7 @@ public class InterfazLenguaje extends JFrame {
             if (!linea.endsWith(";")) {
 
                 imprimirEnConsola(
-                        "ERROR DE SINTAXIS: falta ';' al final.\n\n",
+                        "ERROR SINTÁCTICO: falta ';' al final.\n\n",
                         BTN_RED);
 
                 continue;
@@ -790,10 +812,17 @@ public class InterfazLenguaje extends JFrame {
 
             String sinPuntoComa = linea.substring(0, linea.length() - 1).trim();
 
+            // EVITAMOS ERROR SINTÁCTICO DEL IF EN EL ANÁLISIS GRAMATICAL
+            if (sinPuntoComa.startsWith("if")) {
+                imprimirEnConsola("TIPO DE INSTRUCCIÓN: ESTRUCTURA DE CONTROL (IF)\n", ACCENT_GREEN);
+                imprimirEnConsola("<bloque> : <paréntesis> : <expresión>\n\n", ACCENT_PINK);
+                continue;
+            }
+
             if (!sinPuntoComa.contains("~")) {
 
                 imprimirEnConsola(
-                        "ERROR DE SINTAXIS: falta operador '~'.\n\n",
+                        "ERROR SINTÁCTICO: falta operador '~'.\n\n",
                         BTN_RED);
 
                 continue;
@@ -888,7 +917,7 @@ public class InterfazLenguaje extends JFrame {
             } else {
 
                 imprimirEnConsola(
-                        "ERROR DE SINTAXIS: lado izquierdo inválido.\n\n",
+                        "ERROR SINTÁCTICO: lado izquierdo inválido.\n\n",
                         BTN_RED);
 
                 continue;
