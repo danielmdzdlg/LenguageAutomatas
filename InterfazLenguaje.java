@@ -459,6 +459,9 @@ public class InterfazLenguaje extends JFrame {
         }
 
         String condicion = matcher.group(1).trim();
+        // Corrección automática de operadores escritos al revés
+        condicion = condicion.replace("=<", "<=");
+        condicion = condicion.replace("=>", ">=");
         String bloqueIf = matcher.group(2).trim();
         String bloqueElse = matcher.group(3).trim();
         if (condicion.isEmpty()) {
