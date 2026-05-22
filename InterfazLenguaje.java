@@ -68,7 +68,7 @@ public class InterfazLenguaje extends JFrame {
         gbc.weighty = 0.42;
         add(createModernScrollPane(noWrapPanel, "Editor de Código", ACCENT_CYAN, fuenteTitulos), gbc);
 
-        String[] columnas = { "Token", "Lexema", "Patrón", "¿Es Reservada?" };
+        String[] columnas = { "Token/Lexema", "Patrón", "¿Es Reservada?" };
         modeloTabla = new DefaultTableModel(columnas, 0);
         tablaTokens = new JTable(modeloTabla);
         tablaTokens.setBackground(BG_MAIN);
@@ -303,7 +303,11 @@ public class InterfazLenguaje extends JFrame {
                 desc = RX_IDENT;
             }
 
-            modeloTabla.addRow(new Object[] { tipo, lexema, desc, res });
+            modeloTabla.addRow(new Object[] {
+                    tipo + " → " + lexema,
+                    desc,
+                    res
+            });
         }
     }
 
@@ -446,27 +450,26 @@ public class InterfazLenguaje extends JFrame {
     }
 
     private void procesarIf(String linea) throws LenguajeException {
-        // Expresión Regular para asegurar la gramática: if ( expresión ) { bloque } [ else { bloque } ]
+        // Expresión Regular para asegurar la gramática: if ( expresión ) { bloque } [
+        // else { bloque } ]
         String patronIf = "^if\\s*\\(\\s*(.*?)\\s*\\)\\s*\\{(.*?)\\}(?:\\s*else\\s*\\{(.*?)\\})?$";
         Pattern pattern = Pattern.compile(patronIf, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(linea);
 
         if (!matcher.matches()) {
             throw new LenguajeException(
-                "Error de Sintaxis: Estructura mal formada. Se esperaba: if (condición) { bloque } [else { bloque }]",
-                "ERROR DE SINTAXIS"
-            );
+                    "Error de Sintaxis: Estructura mal formada. Se esperaba: if (condición) { bloque } [else { bloque }]",
+                    "ERROR DE SINTAXIS");
         }
 
         String condicion = matcher.group(1).trim();
         String bloqueIf = matcher.group(2).trim();
-        String bloqueElse = matcher.group(3); 
+        String bloqueElse = matcher.group(3);
 
         if (condicion.isEmpty()) {
             throw new LenguajeException(
-                "Error de Sintaxis: El 'if' requiere una condición entre los paréntesis.",
-                "ERROR DE SINTAXIS"
-            );
+                    "Error de Sintaxis: El 'if' requiere una condición entre los paréntesis.",
+                    "ERROR DE SINTAXIS");
         }
 
         String[] operadores = { "==", "!=", ">=", "<=", ">", "<" };
@@ -481,17 +484,15 @@ public class InterfazLenguaje extends JFrame {
 
         if (operadorEncontrado.isEmpty()) {
             throw new LenguajeException(
-                "Error de Sintaxis: Falta operador de comparación (==, >, <, etc.) en la condición.",
-                "ERROR DE SINTAXIS"
-            );
+                    "Error de Sintaxis: Falta operador de comparación (==, >, <, etc.) en la condición.",
+                    "ERROR DE SINTAXIS");
         }
 
         String[] partes = condicion.split(Pattern.quote(operadorEncontrado), 2);
         if (partes.length < 2 || partes[0].trim().isEmpty() || partes[1].trim().isEmpty()) {
             throw new LenguajeException(
-                "Error de Sintaxis: El 'if' necesita dos datos para comparar.",
-                "ERROR DE SINTAXIS"
-            );
+                    "Error de Sintaxis: El 'if' necesita dos datos para comparar.",
+                    "ERROR DE SINTAXIS");
         }
 
         String dato1 = partes[0].trim();
@@ -503,18 +504,29 @@ public class InterfazLenguaje extends JFrame {
         boolean resultado = false;
 
         switch (operadorEncontrado) {
-            case "==": resultado = valor1 == valor2; break;
-            case "!=": resultado = valor1 != valor2; break;
-            case ">":  resultado = valor1 > valor2; break;
-            case "<":  resultado = valor1 < valor2; break;
-            case ">=": resultado = valor1 >= valor2; break;
-            case "<=": resultado = valor1 <= valor2; break;
+            case "==":
+                resultado = valor1 == valor2;
+                break;
+            case "!=":
+                resultado = valor1 != valor2;
+                break;
+            case ">":
+                resultado = valor1 > valor2;
+                break;
+            case "<":
+                resultado = valor1 < valor2;
+                break;
+            case ">=":
+                resultado = valor1 >= valor2;
+                break;
+            case "<=":
+                resultado = valor1 <= valor2;
+                break;
         }
 
         imprimirEnConsola(
-            "[IF] Comparación: " + dato1 + " " + operadorEncontrado + " " + dato2 + " → " + resultado + "\n",
-            resultado ? ACCENT_GREEN : ACCENT_ORANGE
-        );
+                "[IF] Comparación: " + dato1 + " " + operadorEncontrado + " " + dato2 + " → " + resultado + "\n",
+                resultado ? ACCENT_GREEN : ACCENT_ORANGE);
 
         if (resultado) {
             if (!bloqueIf.isEmpty()) {
