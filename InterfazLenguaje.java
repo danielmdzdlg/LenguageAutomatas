@@ -68,7 +68,7 @@ public class InterfazLenguaje extends JFrame {
         gbc.weighty = 0.42;
         add(createModernScrollPane(noWrapPanel, "Editor de Código", ACCENT_CYAN, fuenteTitulos), gbc);
 
-        String[] columnas = { "Token/Lexema", "Patrón", "¿Es Reservada?" };
+        String[] columnas = { "Token", "Lexema", "Patrón", "¿Es Reservada?" };
         modeloTabla = new DefaultTableModel(columnas, 0);
         tablaTokens = new JTable(modeloTabla);
         tablaTokens.setBackground(BG_MAIN);
@@ -303,11 +303,7 @@ public class InterfazLenguaje extends JFrame {
                 desc = RX_IDENT;
             }
 
-            modeloTabla.addRow(new Object[] {
-                    tipo + " → " + lexema,
-                    desc,
-                    res
-            });
+            modeloTabla.addRow(new Object[] { lexema, lexema, desc, res });
         }
     }
 
@@ -452,20 +448,19 @@ public class InterfazLenguaje extends JFrame {
     private void procesarIf(String linea) throws LenguajeException {
         // Expresión Regular para asegurar la gramática: if ( expresión ) { bloque } [
         // else { bloque } ]
-        String patronIf = "^if\\s*\\(\\s*(.*?)\\s*\\)\\s*\\{(.*?)\\}(?:\\s*else\\s*\\{(.*?)\\})?$";
+        String patronIf = "^if\\s*\\(\\s*(.*?)\\s*\\)\\s*\\{([^{};]*~[^{};]*;)\\s*\\}\\s*else\\s*\\{([^{};]*~[^{};]*;)\\s*\\}$";
         Pattern pattern = Pattern.compile(patronIf, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(linea);
 
         if (!matcher.matches()) {
             throw new LenguajeException(
-                    "Error de Sintaxis: Estructura mal formada. Se esperaba: if (condición) { bloque } [else { bloque }]",
+                    "Error de Sintaxis: Estructura mal formada. Se esperaba: if (condición) { instrucción; } else { instrucción; }",
                     "ERROR DE SINTAXIS");
         }
 
         String condicion = matcher.group(1).trim();
         String bloqueIf = matcher.group(2).trim();
-        String bloqueElse = matcher.group(3);
-
+        String bloqueElse = matcher.group(3).trim();
         if (condicion.isEmpty()) {
             throw new LenguajeException(
                     "Error de Sintaxis: El 'if' requiere una condición entre los paréntesis.",
